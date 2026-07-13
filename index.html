@@ -2916,6 +2916,14 @@ function getAudioCtx() {
   return audioCtx;
 }
 
+// Unlock audio on first touch (iOS requirement)
+document.addEventListener('touchstart', function unlockAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume().then(() => {
+    document.removeEventListener('touchstart', unlockAudio);
+  });
+}, {once: false});
+
 // Note frequencies (Hz) - standard tuning
 const NOTE_FREQ = {
   'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'B3':246.94,
