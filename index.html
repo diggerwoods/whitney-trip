@@ -1138,6 +1138,48 @@ h1, h2, h3, h4 {
   border-color: var(--charcoal);
 }
 
+/* License Plates */
+.plates-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.plate-chip {
+  background: white;
+  border: 1.5px solid rgba(196, 160, 160, 0.2);
+  border-radius: 8px;
+  padding: 10px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.plate-chip .plate-abbr {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--charcoal);
+}
+
+.plate-chip .plate-name {
+  font-size: 0.6rem;
+  color: var(--warm-gray);
+  margin-top: 2px;
+}
+
+.plate-chip.found {
+  background: var(--sage-light);
+  border-color: var(--sage);
+}
+
+.plate-chip.found .plate-abbr {
+  color: var(--deep-sage);
+}
+
+.plate-chip.found .plate-name {
+  color: var(--deep-sage);
+}
+
 /* Trivia */
 .trivia-container {
   text-align: center;
@@ -1486,9 +1528,20 @@ h1, h2, h3, h4 {
   <div class="game-tabs">
     <button class="game-tab active" onclick="switchGameTab('trivia')">Trivia</button>
     <button class="game-tab" onclick="switchGameTab('wyr')">Would You Rather</button>
+    <button class="game-tab" onclick="switchGameTab('plates')">License Plates</button>
   </div>
   <div id="trivia-panel" class="trivia-container"></div>
   <div id="wyr-panel" class="wyr-container" style="display:none;"></div>
+  <div id="plates-panel" style="display:none;">
+    <div style="text-align:center; margin-bottom: 16px;">
+      <p style="font-size: 0.85rem; color: var(--warm-gray);">Tap a state or province when you spot their plate!</p>
+      <p class="plate-counter" id="plate-counter" style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--charcoal); margin-top: 8px;">0 / 63 found</p>
+    </div>
+    <h4 style="font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--dusty-rose); margin-bottom: 10px;">United States</h4>
+    <div class="plates-grid" id="us-plates-grid"></div>
+    <h4 style="font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--dusty-rose); margin: 18px 0 10px;">Canadian Provinces</h4>
+    <div class="plates-grid" id="ca-plates-grid"></div>
+  </div>
 </div>
 </div>
 
@@ -2289,6 +2342,64 @@ const triviaQuestions = [
   {q: "How many factions exist in the Divergent world?", options: ["3", "4", "5", "6"], answer: 2, cat: "Books"},
   {q: "What is an 'unreliable narrator'?", options: ["A narrator who lies or has limited perspective", "A boring narrator", "A third-person narrator", "A narrator who dies"], answer: 0, cat: "Books"},
   {q: "What literary device uses 'like' or 'as' for comparison?", options: ["Metaphor", "Simile", "Alliteration", "Personification"], answer: 1, cat: "Books"},
+
+  // The Office
+  {q: "What is the name of the paper company in The Office?", options: ["Staples", "Dunder Mifflin", "Wernham Hogg", "Michael Scott Paper Co."], answer: 1, cat: "The Office"},
+  {q: "What city is The Office set in?", options: ["Scranton, PA", "Albany, NY", "Stamford, CT", "Nashua, NH"], answer: 0, cat: "The Office"},
+  {q: "What is Dwight's last name?", options: ["Bratton", "Schrute", "Halpert", "Bernard"], answer: 1, cat: "The Office"},
+  {q: "What does Michael Scott declare when he can't pay his debts?", options: ["'I quit!'", "'Bankruptcy!'", "'I declare bankruptcy!'", "'I'm ruined!'"], answer: 2, cat: "The Office"},
+  {q: "What type of farm does Dwight own?", options: ["Corn farm", "Beet farm", "Potato farm", "Apple orchard"], answer: 1, cat: "The Office"},
+  {q: "Who does Jim eventually marry?", options: ["Karen", "Pam", "Holly", "Jan"], answer: 1, cat: "The Office"},
+  {q: "What is Michael Scott's catchphrase?", options: ["'That's what she said'", "'Bears, beets, Battlestar Galactica'", "'I am the lizard king'", "'Parkour!'"], answer: 0, cat: "The Office"},
+  {q: "What does Kevin spill all over the office floor?", options: ["Coffee", "His famous chili", "A birthday cake", "Pasta sauce"], answer: 1, cat: "The Office"},
+  {q: "What game does Jim put Dwight's stapler in?", options: ["A cake", "A Jell-O mold", "A fish tank", "A filing cabinet"], answer: 1, cat: "The Office"},
+  {q: "What is the name of the warehouse worker who wins the lottery?", options: ["Roy", "Darryl", "Hide", "No one wins it"], answer: 3, cat: "The Office"},
+  {q: "What character does Steve Carell play?", options: ["Jim Halpert", "Dwight Schrute", "Michael Scott", "Andy Bernard"], answer: 2, cat: "The Office"},
+  {q: "What is the name of Michael's movie he's been writing?", options: ["Threat Level Midnight", "Agent Michael Scarn", "The Dundies Movie", "Clean Slate"], answer: 0, cat: "The Office"},
+  {q: "What award ceremony does Michael host every year?", options: ["The Emmys", "The Dundies", "The Scotties", "The Paper Awards"], answer: 1, cat: "The Office"},
+  {q: "What does Andy Bernard call himself when he's angry?", options: ["The Anger", "Drew", "The Nard Dog", "Big Tuna"], answer: 2, cat: "The Office"},
+  {q: "What does Jim dress up as to impersonate Dwight?", options: ["A farmer", "Dwight (glasses, shirt, beets)", "A detective", "A ninja"], answer: 1, cat: "The Office"},
+  {q: "What is the name of the HR representative everyone hates?", options: ["Toby", "Gabe", "Ryan", "Creed"], answer: 0, cat: "The Office"},
+  {q: "What does Dwight do at the snowball fight?", options: ["Surrenders", "Pelts Jim mercilessly with snowballs", "Builds a fort", "Refuses to participate"], answer: 1, cat: "The Office"},
+  {q: "Who starts the fire (Ryan started the fire)?", options: ["Michael", "Dwight", "Ryan", "Kevin"], answer: 2, cat: "The Office"},
+
+  // More Music
+  {q: "What year was Nirvana's 'Nevermind' released?", options: ["1989", "1991", "1993", "1995"], answer: 1, cat: "Music"},
+  {q: "Taylor Swift's 'Eras Tour' became the highest-grossing tour of all time in what year?", options: ["2022", "2023", "2024", "2025"], answer: 1, cat: "Music"},
+  {q: "Noah Kahan's genre is best described as?", options: ["Pop punk", "Folk pop", "Country", "R&B"], answer: 1, cat: "Music"},
+  {q: "Which Mumford & Sons member left the band in 2021?", options: ["Marcus Mumford", "Winston Marshall", "Ben Lovett", "Ted Dwane"], answer: 1, cat: "Music"},
+  {q: "Gracie Abrams is the daughter of which famous director?", options: ["Steven Spielberg", "J.J. Abrams", "Martin Scorsese", "Christopher Nolan"], answer: 1, cat: "Music"},
+  {q: "What was Kurt Cobain's guitar of choice?", options: ["Gibson Les Paul", "Fender Mustang/Jaguar", "Telecaster", "PRS Custom"], answer: 1, cat: "Music"},
+  {q: "Ben Rector is from which state?", options: ["Oklahoma", "Texas", "Tennessee", "Arkansas"], answer: 0, cat: "Music"},
+  {q: "What is a capo used for on a guitar?", options: ["Tuning", "Changing the key without retuning", "Making it louder", "Muting strings"], answer: 1, cat: "Music"},
+  {q: "Which Taylor Swift album was entirely re-recorded first?", options: ["1989", "Red", "Fearless", "Speak Now"], answer: 2, cat: "Music"},
+  {q: "Phoebe Bridgers is known for wearing what to perform?", options: ["All black", "A skeleton suit", "White dresses", "Vintage band tees"], answer: 1, cat: "Music"},
+
+  // More Art
+  {q: "What is 'plein air' painting?", options: ["Painting with acrylics", "Painting outdoors", "Abstract painting", "Painting from photographs"], answer: 1, cat: "Art"},
+  {q: "What Japanese art repairs broken pottery with gold?", options: ["Origami", "Ikebana", "Kintsugi", "Wabi-sabi"], answer: 2, cat: "Art"},
+  {q: "Georgia O'Keeffe is famous for painting what subjects?", options: ["Portraits", "Flowers and desert landscapes", "Ocean scenes", "City skylines"], answer: 1, cat: "Art"},
+  {q: "What is the difference between a hue and a tint?", options: ["Hue is darker", "A tint has white added", "They're the same thing", "A tint has black added"], answer: 1, cat: "Art"},
+  {q: "Banksy is known for what type of art?", options: ["Oil painting", "Sculpture", "Street art/graffiti", "Photography"], answer: 2, cat: "Art"},
+  {q: "What does 'impasto' mean in painting?", options: ["Thin wash", "Thick textured paint", "Smooth blending", "Dry brush technique"], answer: 1, cat: "Art"},
+  {q: "Which artist cut off part of his own ear?", options: ["Picasso", "Monet", "Van Gogh", "Rembrandt"], answer: 2, cat: "Art"},
+  {q: "What is a monochrome painting?", options: ["Very small", "Using only one color/shades of one color", "Using all colors", "Black and white only"], answer: 1, cat: "Art"},
+
+  // More Photography
+  {q: "What is 'golden ratio' composition in photography?", options: ["Shooting at golden hour", "A spiral-based composition guide", "Using gold-toned filters", "1:1 aspect ratio"], answer: 1, cat: "Photography"},
+  {q: "What does 'overexposed' mean?", options: ["Too dark", "Too bright/washed out", "Too blurry", "Too saturated"], answer: 1, cat: "Photography"},
+  {q: "What is a prime lens?", options: ["An expensive lens", "A lens with fixed focal length (no zoom)", "A wide-angle lens", "A macro lens"], answer: 1, cat: "Photography"},
+  {q: "What is 'grain' in photography?", options: ["Dust on the lens", "Visual noise/texture in an image", "A type of filter", "Lens distortion"], answer: 1, cat: "Photography"},
+  {q: "What is a 'long exposure' shot good for capturing?", options: ["Fast action frozen", "Light trails, smooth water, star trails", "Portraits", "Close-ups"], answer: 1, cat: "Photography"},
+  {q: "What does 'portrait mode' on a phone simulate?", options: ["Black and white", "Shallow depth of field (blurry background)", "Slow motion", "Panorama"], answer: 1, cat: "Photography"},
+
+  // More Stranger Things / Pop Culture
+  {q: "What song does Max listen to on repeat to escape Vecna?", options: ["Separate Ways", "Running Up That Hill", "Every Breath You Take", "Should I Stay or Should I Go"], answer: 1, cat: "Pop Culture"},
+  {q: "What is Eleven's real name?", options: ["Jane", "Sarah", "Joyce", "Terry"], answer: 0, cat: "Pop Culture"},
+  {q: "In Stranger Things, who runs the Hawkins Lab?", options: ["Dr. Owens", "Dr. Brenner", "Hopper", "Murray"], answer: 1, cat: "Pop Culture"},
+  {q: "What D&D character do the boys compare the season 1 monster to?", options: ["Vecna", "Demogorgon", "Mind Flayer", "Beholder"], answer: 1, cat: "Pop Culture"},
+  {q: "Steve Harrington's signature look includes what?", options: ["A leather jacket", "Amazing hair", "Sunglasses", "A baseball cap"], answer: 1, cat: "Pop Culture"},
+  {q: "What decade is Stranger Things set in?", options: ["1970s", "1980s", "1990s", "2000s"], answer: 1, cat: "Pop Culture"},
 ];
 
 let triviaState = {
@@ -2420,6 +2531,15 @@ const wyrQuestions = [
   {a: "Teleport anywhere but only once per week", b: "Fly but only at walking speed"},
   {a: "Everything you draw comes to life", b: "You can step inside any painting"},
   {a: "Know the ending of every book before you read it", b: "Forget every book so you can reread it fresh"},
+  // The Office
+  {a: "Have Michael Scott as your boss for a year", b: "Have Dwight as your desk neighbor for a year"},
+  {a: "Be stuck in an elevator with Kevin's chili", b: "Be stuck in an elevator with Toby for 3 hours"},
+  {a: "Only communicate in Michael Scott quotes for a day", b: "Only communicate in Dwight Schrute quotes for a day"},
+  {a: "Work at Dunder Mifflin Scranton", b: "Work at Willy Wonka's Chocolate Factory"},
+  {a: "Go to a Dundies ceremony", b: "Go to one of Michael's dinner parties"},
+  {a: "Have Jim prank you every day for a month", b: "Have to listen to Andy sing every morning"},
+  {a: "Live on Schrute Farms for a week", b: "Road trip with Michael Scott driving"},
+  {a: "Be Creed's emergency contact", b: "Be Michael's improv partner"},
 ];
 
 let wyrState = { current: 0, order: [] };
@@ -2468,10 +2588,66 @@ function switchGameTab(tab) {
   event.currentTarget.classList.add('active');
   document.getElementById('trivia-panel').style.display = tab === 'trivia' ? 'block' : 'none';
   document.getElementById('wyr-panel').style.display = tab === 'wyr' ? 'block' : 'none';
+  document.getElementById('plates-panel').style.display = tab === 'plates' ? 'block' : 'none';
   if (tab === 'wyr' && wyrState.order.length === 0) renderWYR();
 }
 
 renderWYR();
+
+// ============ LICENSE PLATE GAME ============
+const usStates = [
+  {abbr:"AL",name:"Alabama"},{abbr:"AK",name:"Alaska"},{abbr:"AZ",name:"Arizona"},{abbr:"AR",name:"Arkansas"},
+  {abbr:"CA",name:"California"},{abbr:"CO",name:"Colorado"},{abbr:"CT",name:"Connecticut"},{abbr:"DE",name:"Delaware"},
+  {abbr:"FL",name:"Florida"},{abbr:"GA",name:"Georgia"},{abbr:"HI",name:"Hawaii"},{abbr:"ID",name:"Idaho"},
+  {abbr:"IL",name:"Illinois"},{abbr:"IN",name:"Indiana"},{abbr:"IA",name:"Iowa"},{abbr:"KS",name:"Kansas"},
+  {abbr:"KY",name:"Kentucky"},{abbr:"LA",name:"Louisiana"},{abbr:"ME",name:"Maine"},{abbr:"MD",name:"Maryland"},
+  {abbr:"MA",name:"Massachusetts"},{abbr:"MI",name:"Michigan"},{abbr:"MN",name:"Minnesota"},{abbr:"MS",name:"Mississippi"},
+  {abbr:"MO",name:"Missouri"},{abbr:"MT",name:"Montana"},{abbr:"NE",name:"Nebraska"},{abbr:"NV",name:"Nevada"},
+  {abbr:"NH",name:"N. Hampshire"},{abbr:"NJ",name:"New Jersey"},{abbr:"NM",name:"New Mexico"},{abbr:"NY",name:"New York"},
+  {abbr:"NC",name:"N. Carolina"},{abbr:"ND",name:"N. Dakota"},{abbr:"OH",name:"Ohio"},{abbr:"OK",name:"Oklahoma"},
+  {abbr:"OR",name:"Oregon"},{abbr:"PA",name:"Pennsylvania"},{abbr:"RI",name:"Rhode Island"},{abbr:"SC",name:"S. Carolina"},
+  {abbr:"SD",name:"S. Dakota"},{abbr:"TN",name:"Tennessee"},{abbr:"TX",name:"Texas"},{abbr:"UT",name:"Utah"},
+  {abbr:"VT",name:"Vermont"},{abbr:"VA",name:"Virginia"},{abbr:"WA",name:"Washington"},{abbr:"WV",name:"W. Virginia"},
+  {abbr:"WI",name:"Wisconsin"},{abbr:"WY",name:"Wyoming"}
+];
+const caProvinces = [
+  {abbr:"AB",name:"Alberta"},{abbr:"BC",name:"British Columbia"},{abbr:"MB",name:"Manitoba"},
+  {abbr:"NB",name:"New Brunswick"},{abbr:"NL",name:"Newfoundland"},{abbr:"NS",name:"Nova Scotia"},
+  {abbr:"NT",name:"NW Territories"},{abbr:"NU",name:"Nunavut"},{abbr:"ON",name:"Ontario"},
+  {abbr:"PE",name:"PEI"},{abbr:"QC",name:"Quebec"},{abbr:"SK",name:"Saskatchewan"},{abbr:"YT",name:"Yukon"}
+];
+
+let foundPlates = JSON.parse(localStorage.getItem('whitney-plates') || '[]');
+
+function renderPlates() {
+  const usGrid = document.getElementById('us-plates-grid');
+  const caGrid = document.getElementById('ca-plates-grid');
+  usGrid.innerHTML = usStates.map(s =>
+    `<div class="plate-chip ${foundPlates.includes(s.abbr) ? 'found' : ''}" onclick="togglePlate('${s.abbr}')">
+      <div class="plate-abbr">${s.abbr}</div>
+      <div class="plate-name">${s.name}</div>
+    </div>`
+  ).join('');
+  caGrid.innerHTML = caProvinces.map(s =>
+    `<div class="plate-chip ${foundPlates.includes(s.abbr) ? 'found' : ''}" onclick="togglePlate('${s.abbr}')">
+      <div class="plate-abbr">${s.abbr}</div>
+      <div class="plate-name">${s.name}</div>
+    </div>`
+  ).join('');
+  document.getElementById('plate-counter').textContent = `${foundPlates.length} / 63 found`;
+}
+
+function togglePlate(abbr) {
+  if (foundPlates.includes(abbr)) {
+    foundPlates = foundPlates.filter(p => p !== abbr);
+  } else {
+    foundPlates.push(abbr);
+  }
+  localStorage.setItem('whitney-plates', JSON.stringify(foundPlates));
+  renderPlates();
+}
+
+renderPlates();
 
 // ============ SONGWRITING TOOL ============
 const chordBank = [
