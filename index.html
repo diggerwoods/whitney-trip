@@ -1470,6 +1470,7 @@ h1, h2, h3, h4 {
       </div>
       <div class="progression-actions">
         <button class="song-btn" onclick="clearProgression()">Clear</button>
+        <button class="song-btn" id="play-prog-btn" onclick="playProgression()">Play Progression</button>
         <button class="song-btn primary" onclick="saveCurrentSong()">Save to Song</button>
       </div>
     </div>
@@ -2650,6 +2651,130 @@ function togglePlate(abbr) {
 renderPlates();
 
 // ============ SONGWRITING TOOL ============
+
+// Web Audio API - Guitar Chord Synth
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Note frequencies (Hz) - standard tuning
+const NOTE_FREQ = {
+  'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'B3':246.94,
+  'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,
+  'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00,'B5':987.77,
+  'Db3':138.59,'Eb3':155.56,'Gb3':185.00,'Ab3':207.65,'Bb3':233.08,
+  'Db4':277.18,'Eb4':311.13,'Gb4':369.99,'Ab4':415.30,'Bb4':466.16,
+  'Db5':554.37,'Eb5':622.25,'Gb5':739.99,'Ab5':830.61,'Bb5':932.33,
+};
+
+// Chord definitions (notes that make up each chord, guitar voicing)
+const CHORD_NOTES = {
+  'C':  ['C3','E4','G4','C5','E5'],
+  'D':  ['D3','A3','D4','Gb4'],
+  'E':  ['E3','B3','E4','Ab4','B4','E5'],
+  'F':  ['F3','C4','F4','A4','C5'],
+  'G':  ['G3','B3','D4','G4','B4','G5'],
+  'A':  ['A3','E4','A4','Db5','E5'],
+  'Am': ['A3','E4','A4','C5','E5'],
+  'Bm': ['B3','Gb4','B4','D5','Gb5'],
+  'Cm': ['C3','Eb4','G4','C5','Eb5'],
+  'Dm': ['D3','A3','D4','F4','A4'],
+  'Em': ['E3','B3','E4','G4','B4','E5'],
+  'Fm': ['F3','C4','F4','Ab4','C5'],
+  'C7': ['C3','E4','Bb4','C5','E5'],
+  'D7': ['D3','A3','C4','Gb4'],
+  'G7': ['G3','B3','D4','F4','B4'],
+  'Cadd9':['C3','E4','G4','D5','E5'],
+  'Dsus4':['D3','A3','D4','G4','A4'],
+  'Fmaj7':['F3','C4','E4','A4','C5'],
+  'Am7': ['A3','E4','G4','C5','E5'],
+  'Em7': ['E3','B3','D4','G4','B4'],
+  'Bm7': ['B3','Gb4','A4','D5','Gb5'],
+  'D/F#':['Gb3','D4','A4','D5'],
+};
+
+function playChord(chordName) {
+  const ctx = getAudioCtx();
+  const notes = CHORD_NOTES[chordName] || CHORD_NOTES[chordName.replace('/','/')] || null;
+  if (!notes) return;
+  
+  const now = ctx.currentTime;
+  
+  // Strum effect - slight delay between each note
+  notes.forEach((note, i) => {
+    const freq = NOTE_FREQ[note];
+    if (!freq) return;
+    
+    const strumDelay = i * 0.03; // 30ms between strings
+    
+    // Oscillator (guitar-like: mix of triangle + a bit of sawtooth)
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    osc1.type = 'triangle';
+    osc2.type = 'sawtooth';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq;
+    
+    // Gain envelopes
+    const gain1 = ctx.createGain();
+    const gain2 = ctx.createGain();
+    const masterGain = ctx.createGain();
+    
+    // Triangle is the main sound
+    gain1.gain.setValueAtTime(0, now + strumDelay);
+    gain1.gain.linearRampToValueAtTime(0.15, now + strumDelay + 0.01);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + strumDelay + 1.2);
+    
+    // Sawtooth adds brightness (very quiet)
+    gain2.gain.setValueAtTime(0, now + strumDelay);
+    gain2.gain.linearRampToValueAtTime(0.03, now + strumDelay + 0.005);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + strumDelay + 0.6);
+    
+    masterGain.gain.value = 0.7;
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(masterGain);
+    gain2.connect(masterGain);
+    masterGain.connect(ctx.destination);
+    
+    osc1.start(now + strumDelay);
+    osc2.start(now + strumDelay);
+    osc1.stop(now + strumDelay + 1.5);
+    osc2.stop(now + strumDelay + 1.5);
+  });
+}
+
+let isPlayingProgression = false;
+
+function playProgression() {
+  if (currentProgression.length === 0 || isPlayingProgression) return;
+  isPlayingProgression = true;
+  
+  const btn = document.getElementById('play-prog-btn');
+  if (btn) btn.textContent = 'Playing...';
+  
+  let i = 0;
+  function playNext() {
+    if (i >= currentProgression.length) {
+      isPlayingProgression = false;
+      if (btn) btn.textContent = 'Play Progression';
+      return;
+    }
+    // Highlight current chord
+    const chordEls = document.querySelectorAll('.prog-chord');
+    chordEls.forEach((el, idx) => el.style.transform = idx === i ? 'scale(1.15)' : 'scale(1)');
+    
+    playChord(currentProgression[i]);
+    i++;
+    setTimeout(playNext, 1200); // 1.2 seconds per chord
+  }
+  playNext();
+}
+
 const chordBank = [
   {name: "C", type: "major"}, {name: "D", type: "major"}, {name: "E", type: "major"},
   {name: "F", type: "major"}, {name: "G", type: "major"}, {name: "A", type: "major"},
@@ -2678,7 +2803,7 @@ let currentProgression = [];
 function renderChordBank() {
   const container = document.getElementById('chord-bank');
   container.innerHTML = chordBank.map(ch =>
-    `<div class="chord-chip ${ch.type === 'minor' ? 'minor' : ''}" onclick="addChordToProgression('${ch.name}')">${ch.name}</div>`
+    `<div class="chord-chip ${ch.type === 'minor' ? 'minor' : ''}" onclick="addChordToProgression('${ch.name}'); playChord('${ch.name}')">${ch.name}</div>`
   ).join('');
 }
 
@@ -2696,6 +2821,8 @@ function loadPreset(idx) {
   const preset = progressionPresets[idx];
   currentProgression = preset.chords.split(' - ').map(c => c.trim());
   renderCurrentProgression();
+  // Auto-play the loaded progression
+  setTimeout(playProgression, 300);
 }
 
 function addChordToProgression(chord) {
