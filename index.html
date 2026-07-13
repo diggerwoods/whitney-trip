@@ -2916,13 +2916,27 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-// Unlock audio on first touch (iOS requirement)
-document.addEventListener('touchstart', function unlockAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  audioCtx.resume().then(() => {
-    document.removeEventListener('touchstart', unlockAudio);
-  });
-}, {once: false});
+// iOS audio unlock - play silent buffer on first interaction
+(function() {
+  function unlock() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    // Create and play a silent buffer to fully unlock
+    const buf = audioCtx.createBuffer(1, 1, 22050);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(audioCtx.destination);
+    src.start(0);
+    document.removeEventListener('touchstart', unlock, true);
+    document.removeEventListener('touchend', unlock, true);
+    document.removeEventListener('click', unlock, true);
+  }
+  document.addEventListener('touchstart', unlock, true);
+  document.addEventListener('touchend', unlock, true);
+  document.addEventListener('click', unlock, true);
+})();
 
 // Note frequencies (Hz) - standard tuning
 const NOTE_FREQ = {
