@@ -1009,6 +1009,198 @@ h1, h2, h3, h4 {
   color: #c44;
 }
 
+/* Metronome */
+.metronome-container {
+  background: white;
+  border: 1px solid rgba(196, 160, 160, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.metronome-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.metro-adjust {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sage-light);
+  background: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.metro-adjust:hover {
+  border-color: var(--sage);
+  background: var(--sage-light);
+}
+
+.metro-adjust:active {
+  transform: scale(0.9);
+}
+
+.metro-bpm {
+  text-align: center;
+}
+
+.metro-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1;
+}
+
+.metro-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--warm-gray);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.metro-slider {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--sage-light);
+  border-radius: 2px;
+  outline: none;
+  margin-bottom: 16px;
+}
+
+.metro-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--charcoal);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.metro-presets {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.metro-preset {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--sage-light);
+  background: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--warm-gray);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.metro-preset:hover {
+  border-color: var(--sage);
+  color: var(--charcoal);
+  background: var(--sage-light);
+}
+
+.metro-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metro-beats {
+  display: flex;
+  gap: 6px;
+}
+
+.metro-beat-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--sage-light);
+  background: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--warm-gray);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.metro-beat-btn.active {
+  background: var(--charcoal);
+  color: white;
+  border-color: var(--charcoal);
+}
+
+.metro-start-btn {
+  padding: 10px 28px;
+  border-radius: 24px;
+  border: none;
+  background: var(--charcoal);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.metro-start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.metro-start-btn.running {
+  background: var(--dusty-rose);
+}
+
+.metro-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  min-height: 20px;
+}
+
+.metro-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sage-light);
+  transition: all 0.1s;
+}
+
+.metro-dot.beat-1 {
+  background: var(--dusty-rose);
+  transform: scale(1.3);
+}
+
+.metro-dot.active {
+  background: var(--sage);
+  transform: scale(1.2);
+}
+
+.metro-dot.active.beat-1 {
+  background: var(--dusty-rose);
+  transform: scale(1.4);
+}
+
 /* Read Section */
 .read-section .section-header {
   text-align: center;
@@ -1453,6 +1645,38 @@ h1, h2, h3, h4 {
       <h3 class="song-section-title">Common Progressions</h3>
       <p class="song-section-desc">Tap to load a progression. These are behind tons of your favorite songs.</p>
       <div class="progression-grid" id="progression-grid"></div>
+    </div>
+
+    <!-- Metronome -->
+    <div class="song-section">
+      <h3 class="song-section-title">Metronome</h3>
+      <div class="metronome-container">
+        <div class="metronome-display">
+          <button class="metro-adjust" onclick="adjustBPM(-5)">-</button>
+          <div class="metro-bpm">
+            <span class="metro-number" id="bpm-display">100</span>
+            <span class="metro-label">BPM</span>
+          </div>
+          <button class="metro-adjust" onclick="adjustBPM(5)">+</button>
+        </div>
+        <input type="range" id="bpm-slider" class="metro-slider" min="40" max="220" value="100" oninput="setBPM(this.value)">
+        <div class="metro-presets">
+          <button class="metro-preset" onclick="setBPM(60)">Slow</button>
+          <button class="metro-preset" onclick="setBPM(80)">Ballad</button>
+          <button class="metro-preset" onclick="setBPM(100)">Mid</button>
+          <button class="metro-preset" onclick="setBPM(120)">Upbeat</button>
+          <button class="metro-preset" onclick="setBPM(140)">Fast</button>
+        </div>
+        <div class="metro-controls">
+          <div class="metro-beats">
+            <button class="metro-beat-btn ${true}" onclick="setTimeSignature(3)">3/4</button>
+            <button class="metro-beat-btn active" onclick="setTimeSignature(4)">4/4</button>
+            <button class="metro-beat-btn" onclick="setTimeSignature(6)">6/8</button>
+          </div>
+          <button class="metro-start-btn" id="metro-toggle" onclick="toggleMetronome()">Start</button>
+        </div>
+        <div class="metro-dots" id="metro-dots"></div>
+      </div>
     </div>
 
     <!-- Chord Bank -->
@@ -2774,6 +2998,111 @@ function playProgression() {
   }
   playNext();
 }
+
+// ============ METRONOME ============
+let metroBPM = 100;
+let metroBeats = 4;
+let metroRunning = false;
+let metroInterval = null;
+let metroBeat = 0;
+
+function setBPM(val) {
+  metroBPM = parseInt(val);
+  document.getElementById('bpm-display').textContent = metroBPM;
+  document.getElementById('bpm-slider').value = metroBPM;
+  if (metroRunning) {
+    stopMetronome();
+    startMetronome();
+  }
+}
+
+function adjustBPM(delta) {
+  setBPM(Math.max(40, Math.min(220, metroBPM + delta)));
+}
+
+function setTimeSignature(beats) {
+  metroBeats = beats;
+  document.querySelectorAll('.metro-beat-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  renderMetroDots();
+  if (metroRunning) {
+    metroBeat = 0;
+    stopMetronome();
+    startMetronome();
+  }
+}
+
+function renderMetroDots() {
+  const container = document.getElementById('metro-dots');
+  container.innerHTML = Array.from({length: metroBeats}, (_, i) =>
+    `<div class="metro-dot ${i === 0 ? 'beat-1' : ''}"></div>`
+  ).join('');
+}
+
+function playClick(accent) {
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  
+  // Higher pitch for accented beat (beat 1)
+  osc.frequency.value = accent ? 1000 : 700;
+  osc.type = 'sine';
+  
+  gain.gain.setValueAtTime(accent ? 0.5 : 0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.05);
+}
+
+function tick() {
+  const isAccent = metroBeat === 0;
+  playClick(isAccent);
+  
+  // Update visual dots
+  const dots = document.querySelectorAll('.metro-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === metroBeat));
+  
+  metroBeat = (metroBeat + 1) % metroBeats;
+}
+
+function startMetronome() {
+  metroRunning = true;
+  metroBeat = 0;
+  const intervalMs = (60 / metroBPM) * 1000;
+  tick(); // First beat immediately
+  metroInterval = setInterval(tick, intervalMs);
+  
+  const btn = document.getElementById('metro-toggle');
+  btn.textContent = 'Stop';
+  btn.classList.add('running');
+}
+
+function stopMetronome() {
+  metroRunning = false;
+  clearInterval(metroInterval);
+  metroInterval = null;
+  
+  // Clear visual
+  document.querySelectorAll('.metro-dot').forEach(d => d.classList.remove('active'));
+  
+  const btn = document.getElementById('metro-toggle');
+  btn.textContent = 'Start';
+  btn.classList.remove('running');
+}
+
+function toggleMetronome() {
+  if (metroRunning) {
+    stopMetronome();
+  } else {
+    startMetronome();
+  }
+}
+
+renderMetroDots();
 
 const chordBank = [
   {name: "C", type: "major"}, {name: "D", type: "major"}, {name: "E", type: "major"},
