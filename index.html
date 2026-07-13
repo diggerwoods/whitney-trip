@@ -447,10 +447,78 @@ h1, h2, h3, h4 {
   border: 1px solid rgba(196, 160, 160, 0.2);
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   overflow: hidden;
+  position: relative;
 }
 
-#map .leaflet-tile {
-  filter: saturate(0.7) brightness(1.05) contrast(0.95);
+#map::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  border-radius: 20px;
+  box-shadow: inset 0 0 40px rgba(245, 240, 232, 0.4);
+  background: radial-gradient(ellipse at center, transparent 65%, rgba(245, 240, 232, 0.3) 100%);
+}
+
+#map .leaflet-tile-pane {
+  filter: saturate(0.6) brightness(1.02) contrast(0.92) sepia(0.15);
+}
+
+#map .leaflet-popup-content-wrapper {
+  background: var(--ivory);
+  color: var(--charcoal);
+  border: 1px solid var(--dusty-rose-light);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  font-family: 'Nunito', sans-serif;
+}
+
+#map .leaflet-popup-tip {
+  background: var(--ivory);
+}
+
+.map-marker-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-marker-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.map-marker-dot::after {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 160, 160, 0.3);
+  animation: markerPulse 3s ease-in-out infinite;
+}
+
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 0; }
+}
+
+.map-marker-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--charcoal);
+  background: rgba(250, 248, 244, 0.9);
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-top: 4px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  letter-spacing: 0.2px;
 }
 
 .map-legend {
@@ -664,6 +732,281 @@ h1, h2, h3, h4 {
   background: var(--sage);
   border-color: var(--sage);
   color: white;
+}
+
+/* Songwriting */
+.song-section {
+  margin-bottom: 24px;
+}
+
+.song-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.song-section-desc {
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+  margin-bottom: 12px;
+}
+
+.chord-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chord-chip {
+  background: white;
+  border: 1.5px solid var(--sage-light);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  min-width: 48px;
+}
+
+.chord-chip:hover {
+  border-color: var(--sage);
+  background: var(--sage-light);
+}
+
+.chord-chip:active {
+  transform: scale(0.95);
+}
+
+.chord-chip.minor {
+  color: var(--dusty-rose);
+  border-color: var(--dusty-rose-light);
+}
+
+.chord-chip.minor:hover {
+  background: var(--dusty-rose-light);
+  border-color: var(--dusty-rose);
+}
+
+.progression-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progression-preset {
+  background: white;
+  border: 1px solid rgba(196, 160, 160, 0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progression-preset:hover {
+  border-color: var(--sage);
+  background: var(--sage-light);
+}
+
+.progression-preset .preset-chords {
+  font-weight: 700;
+  color: var(--charcoal);
+  font-size: 0.92rem;
+  letter-spacing: 0.3px;
+}
+
+.progression-preset .preset-songs {
+  font-size: 0.72rem;
+  color: var(--warm-gray);
+  font-style: italic;
+  text-align: right;
+  max-width: 55%;
+}
+
+.progression-builder {
+  background: white;
+  border: 2px dashed var(--sage-light);
+  border-radius: 14px;
+  padding: 16px;
+  min-height: 60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  transition: border-color 0.2s;
+}
+
+.progression-builder:has(.prog-chord) {
+  border-style: solid;
+  border-color: var(--sage);
+}
+
+.progression-builder .empty-state {
+  font-size: 0.82rem;
+  color: var(--warm-gray);
+  font-style: italic;
+  width: 100%;
+  text-align: center;
+}
+
+.prog-chord {
+  background: var(--sage-light);
+  border: 1px solid var(--sage);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--deep-sage);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.prog-chord:hover {
+  background: var(--dusty-rose-light);
+  border-color: var(--dusty-rose);
+  color: var(--charcoal);
+}
+
+.progression-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.song-btn {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--sage-light);
+  background: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--warm-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.song-btn:hover {
+  border-color: var(--sage);
+  color: var(--charcoal);
+}
+
+.song-btn.primary {
+  background: var(--charcoal);
+  color: white;
+  border-color: var(--charcoal);
+}
+
+.song-btn.primary:hover {
+  background: var(--charcoal-light);
+}
+
+.lyrics-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 18px;
+  border: 1px solid var(--sage-light);
+  border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--charcoal);
+  background: var(--ivory);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.lyrics-textarea:focus {
+  border-color: var(--dusty-rose);
+}
+
+.lyrics-textarea::placeholder {
+  color: var(--warm-gray);
+  font-style: italic;
+}
+
+.saved-song-card {
+  background: white;
+  border: 1px solid rgba(196, 160, 160, 0.15);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saved-song-card:hover {
+  border-color: var(--sage);
+}
+
+.saved-song-card .song-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.saved-song-card .song-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.saved-song-card .song-date {
+  font-size: 0.7rem;
+  color: var(--warm-gray);
+}
+
+.saved-song-card .song-progression {
+  font-size: 0.82rem;
+  color: var(--deep-sage);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.saved-song-card .song-lyrics-preview {
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-song-card .song-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.saved-song-card .song-actions button {
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--sage-light);
+  background: white;
+  color: var(--warm-gray);
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+}
+
+.saved-song-card .song-actions button:hover {
+  border-color: var(--dusty-rose);
+  color: var(--charcoal);
+}
+
+.saved-song-card .song-actions button.delete-btn:hover {
+  border-color: #e88;
+  color: #c44;
 }
 
 /* Read Section */
@@ -1057,9 +1400,50 @@ h1, h2, h3, h4 {
   <div class="create-tabs">
     <button class="create-tab active" onclick="switchCreateTab('photo')">Photography</button>
     <button class="create-tab" onclick="switchCreateTab('art')">Art Prompts</button>
+    <button class="create-tab" onclick="switchCreateTab('songwriting')">Songwriting</button>
   </div>
   <div id="photo-challenges"></div>
   <div id="art-prompts" style="display:none;"></div>
+  <div id="songwriting-panel" style="display:none;">
+    
+    <!-- Chord Progressions Inspiration -->
+    <div class="song-section">
+      <h3 class="song-section-title">Common Progressions</h3>
+      <p class="song-section-desc">Tap to load a progression. These are behind tons of your favorite songs.</p>
+      <div class="progression-grid" id="progression-grid"></div>
+    </div>
+
+    <!-- Chord Bank -->
+    <div class="song-section">
+      <h3 class="song-section-title">Chord Bank</h3>
+      <p class="song-section-desc">Tap chords to add them to your progression below.</p>
+      <div class="chord-bank" id="chord-bank"></div>
+    </div>
+
+    <!-- Current Progression Builder -->
+    <div class="song-section">
+      <h3 class="song-section-title">Your Progression</h3>
+      <div class="progression-builder" id="progression-builder">
+        <p class="empty-state">Tap chords above to start building</p>
+      </div>
+      <div class="progression-actions">
+        <button class="song-btn" onclick="clearProgression()">Clear</button>
+        <button class="song-btn primary" onclick="saveCurrentSong()">Save to Song</button>
+      </div>
+    </div>
+
+    <!-- Lyrics Pad -->
+    <div class="song-section">
+      <h3 class="song-section-title">Lyrics</h3>
+      <textarea id="lyrics-pad" class="lyrics-textarea" placeholder="Write your lyrics here...&#10;&#10;Tip: Use [C] [Am] [F] [G] inline to mark chord changes" oninput="saveLyricsDraft()"></textarea>
+    </div>
+
+    <!-- Saved Songs -->
+    <div class="song-section">
+      <h3 class="song-section-title">Saved Songs</h3>
+      <div id="saved-songs"></div>
+    </div>
+  </div>
 </div>
 
 <!-- READ SECTION -->
@@ -1456,23 +1840,27 @@ renderJourney();
 
 // ============ MAP ============
 function initMap() {
-  const map = L.map('map', { scrollWheelZoom: true }).setView([46.5, -115], 5);
-  
-  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    maxZoom: 17,
-    attribution: 'Map data: OpenTopoMap'
+  const map = L.map('map', { scrollWheelZoom: true, zoomControl: false }).setView([46.5, -115], 5);
+
+  // Zoom control top-right, minimal
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  // CartoDB Voyager - clean, muted, elegant basemap
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
   }).addTo(map);
 
   const stops = [
-    {name: "Commerce City, CO", lat: 39.8083, lng: -104.9339, type: "home"},
-    {name: "Burley, ID", lat: 42.5357, lng: -113.7928, type: "stay"},
-    {name: "Ellensburg, WA", lat: 46.9965, lng: -120.5478, type: "stay"},
-    {name: "Deception Falls", lat: 47.7172, lng: -121.1936, type: "activity"},
-    {name: "Lynden, WA", lat: 48.9465, lng: -122.4527, type: "stay"},
-    {name: "Ferndale, WA", lat: 48.8465, lng: -122.5910, type: "activity"},
-    {name: "Vancouver, BC", lat: 49.2827, lng: -123.1207, type: "stay"},
-    {name: "Radium Hot Springs, BC", lat: 50.6198, lng: -116.0734, type: "stay"},
-    {name: "Billings, MT", lat: 45.7833, lng: -108.5007, type: "stay"},
+    {name: "Home", label: "Commerce City", lat: 39.8083, lng: -104.9339, type: "home", day: "Start & End", desc: "Where it all begins (and ends)"},
+    {name: "Burley", label: "Burley, ID", lat: 42.5357, lng: -113.7928, type: "stay", day: "Night 1", desc: "First rest stop after crossing Wyoming"},
+    {name: "Ellensburg", label: "Ellensburg, WA", lat: 46.9965, lng: -120.5478, type: "stay", day: "Night 2", desc: "Cozy college town in the valley"},
+    {name: "Deception Falls", label: "Deception Falls", lat: 47.7172, lng: -121.1936, type: "activity", day: "Day 3", desc: "Waterfall hidden in the forest"},
+    {name: "Lynden", label: "Lynden, WA", lat: 48.9465, lng: -122.4527, type: "stay", day: "Nights 3-4", desc: "Wedding weekend + blueberry picking"},
+    {name: "Ferndale", label: "Ferndale, WA", lat: 48.8465, lng: -122.5910, type: "activity", day: "Day 4", desc: "Trevor's wedding"},
+    {name: "Vancouver", label: "Vancouver, BC", lat: 49.2827, lng: -123.1207, type: "stay", day: "Nights 5-7", desc: "Art, music, ocean, mountains. The best."},
+    {name: "Radium Hot Springs", label: "Radium Hot Springs", lat: 50.6198, lng: -116.0734, type: "stay", day: "Nights 8-9", desc: "Hot springs + poutine + mountain magic"},
+    {name: "Billings", label: "Billings, MT", lat: 45.7833, lng: -108.5007, type: "stay", day: "Night 10", desc: "Big Sky Country - last stop before home"},
   ];
 
   const routeCoords = [
@@ -1498,24 +1886,56 @@ function initMap() {
     [39.8083, -104.9339]
   ];
 
+  // Glow/shadow line underneath
   L.polyline(routeCoords, {
-    color: '#c4a0a0',
-    weight: 3,
-    opacity: 0.8,
-    dashArray: '8, 8'
+    color: 'rgba(196, 160, 160, 0.25)',
+    weight: 10,
+    opacity: 1,
+    lineCap: 'round',
+    lineJoin: 'round'
   }).addTo(map);
 
+  // Main route line - dusty rose dashed
+  L.polyline(routeCoords, {
+    color: '#c4a0a0',
+    weight: 2.5,
+    opacity: 0.85,
+    dashArray: '8, 6',
+    lineCap: 'round',
+    lineJoin: 'round'
+  }).addTo(map);
+
+  // Custom markers
+  const colors = { home: '#c4a0a0', stay: '#9caa97', activity: '#c4a94d' };
+  
   stops.forEach(stop => {
-    let color = stop.type === 'home' ? '#c4a0a0' : stop.type === 'activity' ? '#c4a94d' : '#9caa97';
-    let radius = stop.type === 'home' ? 10 : 7;
-    L.circleMarker([stop.lat, stop.lng], {
-      radius: radius,
-      fillColor: color,
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 0.9
-    }).addTo(map).bindPopup(`<strong style="font-family: 'Playfair Display', serif;">${stop.name}</strong>`);
+    const color = colors[stop.type];
+    const size = stop.type === 'home' ? 16 : 12;
+    
+    const icon = L.divIcon({
+      className: 'map-marker-custom',
+      html: `
+        <div class="map-marker-dot" style="width:${size}px; height:${size}px; background:${color};"></div>
+        <div class="map-marker-label">${stop.label}</div>
+      `,
+      iconSize: [100, 40],
+      iconAnchor: [50, 8],
+      popupAnchor: [0, -12]
+    });
+
+    L.marker([stop.lat, stop.lng], { icon: icon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="text-align:center; padding: 4px;">
+          <div style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: #2d2d2d; margin-bottom: 2px;">${stop.name}</div>
+          <div style="font-size: 0.7rem; color: #c4a0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">${stop.day}</div>
+          <div style="font-size: 0.82rem; color: #4a4a4a; line-height: 1.4;">${stop.desc}</div>
+        </div>
+      `);
   });
+
+  // Fit to route
+  map.fitBounds(L.latLngBounds(routeCoords).pad(0.08));
 }
 
 // ============ MUSIC / PLAYLISTS ============
@@ -1727,6 +2147,7 @@ function switchCreateTab(tab) {
   event.currentTarget.classList.add('active');
   document.getElementById('photo-challenges').style.display = tab === 'photo' ? 'block' : 'none';
   document.getElementById('art-prompts').style.display = tab === 'art' ? 'block' : 'none';
+  document.getElementById('songwriting-panel').style.display = tab === 'songwriting' ? 'block' : 'none';
 }
 
 renderChallenges();
@@ -2051,6 +2472,154 @@ function switchGameTab(tab) {
 }
 
 renderWYR();
+
+// ============ SONGWRITING TOOL ============
+const chordBank = [
+  {name: "C", type: "major"}, {name: "D", type: "major"}, {name: "E", type: "major"},
+  {name: "F", type: "major"}, {name: "G", type: "major"}, {name: "A", type: "major"},
+  {name: "Am", type: "minor"}, {name: "Bm", type: "minor"}, {name: "Cm", type: "minor"},
+  {name: "Dm", type: "minor"}, {name: "Em", type: "minor"}, {name: "Fm", type: "minor"},
+  {name: "C7", type: "major"}, {name: "D7", type: "major"}, {name: "G7", type: "major"},
+  {name: "Cadd9", type: "major"}, {name: "Dsus4", type: "major"}, {name: "Fmaj7", type: "major"},
+  {name: "Am7", type: "minor"}, {name: "Em7", type: "minor"}, {name: "Bm7", type: "minor"},
+];
+
+const progressionPresets = [
+  {chords: "G - D - Em - C", songs: "Let It Be, With or Without You, No Woman No Cry"},
+  {chords: "C - G - Am - F", songs: "Somewhere Only We Know, Let Her Go, I'm Yours"},
+  {chords: "Am - F - C - G", songs: "Zombie, Numb, Save Tonight"},
+  {chords: "G - Em - C - D", songs: "Sweet Home Alabama, Cruise, Summer of '69"},
+  {chords: "Em - G - D - A", songs: "Pompeii, Radioactive, Heathens"},
+  {chords: "C - Am - F - G", songs: "Riptide, Ho Hey, I Will Wait"},
+  {chords: "D - A - Bm - G", songs: "Stick Season (Noah Kahan), Photograph"},
+  {chords: "G - D/F# - Em - C", songs: "Wonderwall, She Will Be Loved"},
+  {chords: "Am - G - F - E", songs: "Stairway to Heaven, Hit the Road Jack"},
+  {chords: "C - E - Am - F", songs: "All Too Well, Lover (Taylor Swift)"},
+];
+
+let currentProgression = [];
+
+function renderChordBank() {
+  const container = document.getElementById('chord-bank');
+  container.innerHTML = chordBank.map(ch =>
+    `<div class="chord-chip ${ch.type === 'minor' ? 'minor' : ''}" onclick="addChordToProgression('${ch.name}')">${ch.name}</div>`
+  ).join('');
+}
+
+function renderProgressionPresets() {
+  const container = document.getElementById('progression-grid');
+  container.innerHTML = progressionPresets.map((p, i) =>
+    `<div class="progression-preset" onclick="loadPreset(${i})">
+      <span class="preset-chords">${p.chords}</span>
+      <span class="preset-songs">${p.songs}</span>
+    </div>`
+  ).join('');
+}
+
+function loadPreset(idx) {
+  const preset = progressionPresets[idx];
+  currentProgression = preset.chords.split(' - ').map(c => c.trim());
+  renderCurrentProgression();
+}
+
+function addChordToProgression(chord) {
+  currentProgression.push(chord);
+  renderCurrentProgression();
+}
+
+function removeChordFromProgression(idx) {
+  currentProgression.splice(idx, 1);
+  renderCurrentProgression();
+}
+
+function renderCurrentProgression() {
+  const container = document.getElementById('progression-builder');
+  if (currentProgression.length === 0) {
+    container.innerHTML = '<p class="empty-state">Tap chords above to start building</p>';
+    return;
+  }
+  container.innerHTML = currentProgression.map((ch, i) =>
+    `<div class="prog-chord" onclick="removeChordFromProgression(${i})" title="Tap to remove">${ch}</div>`
+  ).join('');
+}
+
+function clearProgression() {
+  currentProgression = [];
+  renderCurrentProgression();
+}
+
+function saveLyricsDraft() {
+  localStorage.setItem('whitney-lyrics-draft', document.getElementById('lyrics-pad').value);
+}
+
+function loadLyricsDraft() {
+  const draft = localStorage.getItem('whitney-lyrics-draft') || '';
+  document.getElementById('lyrics-pad').value = draft;
+}
+
+function saveCurrentSong() {
+  const lyrics = document.getElementById('lyrics-pad').value.trim();
+  const progression = currentProgression.join(' - ');
+  if (!progression && !lyrics) { alert('Add some chords or lyrics first!'); return; }
+  
+  const title = prompt('Give your song a title:');
+  if (!title) return;
+
+  const songs = JSON.parse(localStorage.getItem('whitney-songs') || '[]');
+  songs.unshift({
+    title: title,
+    progression: progression,
+    lyrics: lyrics,
+    date: new Date().toLocaleDateString('en-US', {month: 'short', day: 'numeric'})
+  });
+  localStorage.setItem('whitney-songs', JSON.stringify(songs));
+  renderSavedSongs();
+}
+
+function loadSong(idx) {
+  const songs = JSON.parse(localStorage.getItem('whitney-songs') || '[]');
+  const song = songs[idx];
+  if (!song) return;
+  currentProgression = song.progression ? song.progression.split(' - ') : [];
+  document.getElementById('lyrics-pad').value = song.lyrics || '';
+  renderCurrentProgression();
+}
+
+function deleteSong(idx) {
+  if (!confirm('Delete this song?')) return;
+  const songs = JSON.parse(localStorage.getItem('whitney-songs') || '[]');
+  songs.splice(idx, 1);
+  localStorage.setItem('whitney-songs', JSON.stringify(songs));
+  renderSavedSongs();
+}
+
+function renderSavedSongs() {
+  const songs = JSON.parse(localStorage.getItem('whitney-songs') || '[]');
+  const container = document.getElementById('saved-songs');
+  if (songs.length === 0) {
+    container.innerHTML = '<p style="font-size: 0.82rem; color: var(--warm-gray); font-style: italic; text-align: center;">No songs saved yet. Start writing!</p>';
+    return;
+  }
+  container.innerHTML = songs.map((s, i) => `
+    <div class="saved-song-card">
+      <div class="song-title-row">
+        <span class="song-name">${s.title}</span>
+        <span class="song-date">${s.date}</span>
+      </div>
+      ${s.progression ? `<div class="song-progression">${s.progression}</div>` : ''}
+      ${s.lyrics ? `<div class="song-lyrics-preview">${s.lyrics.split('\n')[0]}</div>` : ''}
+      <div class="song-actions">
+        <button onclick="loadSong(${i})">Load</button>
+        <button class="delete-btn" onclick="deleteSong(${i})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderChordBank();
+renderProgressionPresets();
+renderSavedSongs();
+loadLyricsDraft();
 </script>
 </body>
 </html>
