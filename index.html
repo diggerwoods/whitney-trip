@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Whitney's Road Trip - Summer 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --dusty-rose: #c4a0a0;
+  --dusty-rose-light: #e8d5d5;
+  --sage: #9caa97;
+  --sage-light: #d4ddd2;
+  --cream: #f5f0e8;
+  --ivory: #faf8f4;
+  --gold: #c4a94d;
+  --gold-muted: #d4c088;
+  --charcoal: #2d2d2d;
+  --charcoal-light: #4a4a4a;
+  --warm-gray: #8a8078;
+  --blush: #e8c4c4;
+  --deep-sage: #6b7d66;
+  --paper: #f9f6f0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+}
+
+.app-container {
+  max-width: 100vw;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(250, 248, 244, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(196, 160, 160, 0.2);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 4px 12px;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  color: var(--warm-gray);
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: var(--dusty-rose);
+  background: rgba(196, 160, 160, 0.1);
+}
+
+.nav-item .nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nav-item .nav-label {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+
+/* Sections */
+.section {
+  display: none;
+  padding: 24px 20px;
+  animation: fadeIn 0.4s ease;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Countdown Section */
+.countdown-section {
+  text-align: center;
+  padding-top: 60px;
+}
+
+.countdown-title {
+  font-size: 2.2rem;
+  font-style: italic;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.countdown-subtitle {
+  font-size: 0.95rem;
+  color: var(--warm-gray);
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto 40px;
+}
+
+.countdown-item {
+  background: white;
+  border-radius: 16px;
+  padding: 20px 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border: 1px solid rgba(196, 160, 160, 0.15);
+}
+
+.countdown-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1;
+}
+
+.countdown-label {
+  font-size: 0.75rem;
+  color: var(--warm-gray);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 6px;
+}
+
+.trip-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+  padding: 24px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid rgba(196, 160, 160, 0.15);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--deep-sage);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--warm-gray);
+  margin-top: 4px;
+}
+
+/* Quote of the day */
+.daily-quote {
+  margin-top: 40px;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, rgba(196, 160, 160, 0.08), rgba(156, 170, 151, 0.08));
+  border-radius: 20px;
+  border-left: 3px solid var(--gold-muted);
+  position: relative;
+}
+
+.daily-quote::before {
+  content: '\201C';
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  color: var(--gold-muted);
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.quote-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--charcoal);
+  padding-left: 20px;
+}
+
+.quote-author {
+  font-size: 0.8rem;
+  color: var(--warm-gray);
+  margin-top: 12px;
+  padding-left: 20px;
+}
+
+/* Birthday Mode */
+.birthday-toggle {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.birthday-toggle label {
+  font-size: 0.85rem;
+  color: var(--warm-gray);
+  cursor: pointer;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: var(--sage-light);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch.active {
+  background: var(--dusty-rose);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-switch.active::after {
+  transform: translateX(22px);
+}
+
+.birthday-banner {
+  display: none;
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f9e8e8, #fef0dc);
+  border-radius: 16px;
+  text-align: center;
+  animation: sparkle 2s ease infinite;
+}
+
+.birthday-banner.visible {
+  display: block;
+}
+
+@keyframes sparkle {
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 192, 136, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(212, 192, 136, 0.4); }
+}
+
+.birthday-banner h3 {
+  font-size: 1.3rem;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.birthday-banner p {
+  font-size: 0.9rem;
+  color: var(--warm-gray);
+}
+
+/* Journey Section */
+.journey-section .section-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.section-header p {
+  font-size: 0.85rem;
+  color: var(--warm-gray);
+}
+
+.day-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  transition: transform 0.2s;
+}
+
+.day-card:hover {
+  transform: translateY(-2px);
+}
+
+.day-card .day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.day-card .day-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8rem;
+  color: var(--dusty-rose);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.day-card .day-date {
+  font-size: 0.75rem;
+  color: var(--warm-gray);
+  background: var(--sage-light);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.day-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--charcoal);
+}
+
+.day-card .route-info {
+  font-size: 0.82rem;
+  color: var(--warm-gray);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-card .activities {
+  list-style: none;
+  padding: 0;
+}
+
+.day-card .activities li {
+  padding: 6px 0;
+  font-size: 0.88rem;
+  color: var(--charcoal-light);
+  padding-left: 18px;
+  position: relative;
+}
+
+.day-card .activities li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.day-card .suggestions {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(196, 160, 160, 0.3);
+}
+
+.day-card .suggestions h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  margin-bottom: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+.day-card .suggestions li::before {
+  background: var(--gold-muted);
+}
+
+/* Map Section */
+.map-section .section-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#map {
+  width: 100%;
+  height: 60vh;
+  border-radius: 20px;
+  border: 1px solid rgba(196, 160, 160, 0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+#map .leaflet-tile {
+  filter: saturate(0.7) brightness(1.05) contrast(0.95);
+}
+
+.map-legend {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Music Section */
+.music-section .section-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.playlist-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.playlist-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.playlist-card .playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.playlist-card h3 {
+  font-size: 1.1rem;
+  color: var(--charcoal);
+}
+
+.playlist-card .playlist-vibe {
+  font-size: 0.82rem;
+  color: var(--warm-gray);
+  font-style: italic;
+}
+
+.playlist-card .expand-icon {
+  transition: transform 0.3s;
+  color: var(--warm-gray);
+  font-size: 1.2rem;
+}
+
+.playlist-card.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+.playlist-songs {
+  display: none;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(196, 160, 160, 0.15);
+}
+
+.playlist-card.expanded .playlist-songs {
+  display: block;
+}
+
+.song-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.song-item:last-child { border-bottom: none; }
+
+.song-info .song-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.song-info .song-artist {
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+}
+
+.spotify-link {
+  font-size: 0.7rem;
+  color: var(--sage);
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--sage-light);
+  border-radius: 20px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.spotify-link:hover {
+  background: var(--sage-light);
+  color: var(--deep-sage);
+}
+
+/* Create Section (Photo + Art) */
+.create-section .section-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.create-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.create-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--sage-light);
+  background: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--warm-gray);
+  transition: all 0.2s;
+}
+
+.create-tab.active {
+  background: var(--charcoal);
+  color: white;
+  border-color: var(--charcoal);
+}
+
+.challenge-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.challenge-card.completed {
+  opacity: 0.6;
+  background: var(--sage-light);
+}
+
+.challenge-card .day-badge {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--dusty-rose-light), var(--blush));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.challenge-card .challenge-content h4 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 2px;
+}
+
+.challenge-card .challenge-content p {
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+}
+
+.challenge-card .check-circle {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--sage-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.challenge-card.completed .check-circle {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: white;
+}
+
+/* Read Section */
+.read-section .section-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.reading-tracker {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+}
+
+.reading-tracker h3 {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+}
+
+.tracker-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.tracker-input-group .input-wrap {
+  flex: 1;
+}
+
+.tracker-input-group label {
+  font-size: 0.75rem;
+  color: var(--warm-gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tracker-input-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--sage-light);
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  background: var(--ivory);
+  color: var(--charcoal);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.tracker-input-group input:focus {
+  border-color: var(--dusty-rose);
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--sage-light);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sage), var(--deep-sage));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.book-rec {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+}
+
+.book-rec h4 {
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+.book-rec .book-author {
+  font-size: 0.8rem;
+  color: var(--dusty-rose);
+  margin-bottom: 6px;
+}
+
+.book-rec .book-desc {
+  font-size: 0.82rem;
+  color: var(--warm-gray);
+  line-height: 1.5;
+}
+
+/* Games Section */
+.games-section .section-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.game-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.game-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--sage-light);
+  background: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--warm-gray);
+  transition: all 0.2s;
+}
+
+.game-tab.active {
+  background: var(--charcoal);
+  color: white;
+  border-color: var(--charcoal);
+}
+
+/* Trivia */
+.trivia-container {
+  text-align: center;
+}
+
+.trivia-category {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--dusty-rose);
+  margin-bottom: 8px;
+}
+
+.trivia-question-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trivia-question-card h3 {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--charcoal);
+}
+
+.trivia-options {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.trivia-option {
+  padding: 14px 18px;
+  border: 1px solid var(--sage-light);
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  text-align: left;
+  transition: all 0.2s;
+  color: var(--charcoal);
+}
+
+.trivia-option:hover {
+  border-color: var(--sage);
+  background: var(--sage-light);
+}
+
+.trivia-option.correct {
+  background: rgba(156, 170, 151, 0.3);
+  border-color: var(--sage);
+  color: var(--deep-sage);
+}
+
+.trivia-option.incorrect {
+  background: rgba(196, 160, 160, 0.3);
+  border-color: var(--dusty-rose);
+}
+
+.trivia-score {
+  font-size: 0.85rem;
+  color: var(--warm-gray);
+  margin-bottom: 16px;
+}
+
+.trivia-next-btn, .wyr-next-btn {
+  padding: 12px 28px;
+  border-radius: 24px;
+  border: none;
+  background: var(--charcoal);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trivia-next-btn:hover, .wyr-next-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Would You Rather */
+.wyr-container {
+  text-align: center;
+}
+
+.wyr-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  border: 1px solid rgba(196, 160, 160, 0.12);
+  margin-bottom: 20px;
+}
+
+.wyr-card h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--dusty-rose);
+  margin-bottom: 20px;
+}
+
+.wyr-options {
+  display: grid;
+  gap: 12px;
+}
+
+.wyr-option {
+  padding: 18px;
+  border: 2px solid var(--sage-light);
+  border-radius: 14px;
+  background: var(--ivory);
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: var(--charcoal);
+}
+
+.wyr-option:hover {
+  border-color: var(--sage);
+  transform: scale(1.02);
+}
+
+.wyr-option.selected {
+  border-color: var(--deep-sage);
+  background: var(--sage-light);
+}
+
+.wyr-divider {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--warm-gray);
+  padding: 8px 0;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .section { padding: 32px 40px; }
+  .countdown-title { font-size: 2.8rem; }
+  .countdown-number { font-size: 3rem; }
+  #map { height: 70vh; }
+}
+
+@media (max-width: 380px) {
+  .nav-item .nav-label { font-size: 9px; }
+  .nav-item .nav-icon { font-size: 18px; }
+  .countdown-grid { gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+
+<!-- COUNTDOWN SECTION -->
+<div id="countdown" class="section countdown-section active">
+  <h1 class="countdown-title">the adventure awaits</h1>
+  <p class="countdown-subtitle">Commerce City to the Pacific Northwest and back again</p>
+  
+  <div class="countdown-grid">
+    <div class="countdown-item">
+      <div class="countdown-number" id="cd-days">--</div>
+      <div class="countdown-label">Days</div>
+    </div>
+    <div class="countdown-item">
+      <div class="countdown-number" id="cd-hours">--</div>
+      <div class="countdown-label">Hours</div>
+    </div>
+    <div class="countdown-item">
+      <div class="countdown-number" id="cd-mins">--</div>
+      <div class="countdown-label">Mins</div>
+    </div>
+    <div class="countdown-item">
+      <div class="countdown-number" id="cd-secs">--</div>
+      <div class="countdown-label">Secs</div>
+    </div>
+  </div>
+
+  <div class="trip-stats">
+    <div class="stat-item">
+      <div class="stat-number">11</div>
+      <div class="stat-label">Days</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">~2,800</div>
+      <div class="stat-label">Miles</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">5</div>
+      <div class="stat-label">States/Provinces</div>
+    </div>
+  </div>
+
+  <div class="daily-quote">
+    <p class="quote-text" id="quote-text">Loading today's inspiration...</p>
+    <p class="quote-author" id="quote-author"></p>
+  </div>
+
+  <div class="birthday-toggle">
+    <label>Birthday mode</label>
+    <div class="toggle-switch" id="birthday-toggle" onclick="toggleBirthday()"></div>
+    <span style="font-size: 1.2rem;">&#127874;</span>
+  </div>
+
+  <div class="birthday-banner" id="birthday-banner">
+    <h3>&#10024; Happy 15th Birthday, Whitney! &#10024;</h3>
+    <p>A whole new chapter starts today. Make it art.</p>
+  </div>
+</div>
+
+<!-- JOURNEY SECTION -->
+<div id="journey" class="section journey-section">
+  <div class="section-header">
+    <h2>the journey</h2>
+    <p>eleven days, one incredible loop</p>
+  </div>
+  <div id="journey-cards"></div>
+</div>
+
+<!-- MAP SECTION -->
+<div id="map-section" class="section map-section">
+  <div class="section-header">
+    <h2>the route</h2>
+    <p>2,800 miles through mountains, cities, and everything in between</p>
+  </div>
+  <div id="map"></div>
+  <div class="map-legend">
+    <div class="legend-item"><div class="legend-dot" style="background: var(--dusty-rose);"></div> Start/End</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--sage);"></div> Overnight</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--gold);"></div> Activity</div>
+  </div>
+</div>
+
+<!-- MUSIC SECTION -->
+<div id="music" class="section music-section">
+  <div class="section-header">
+    <h2>the soundtrack</h2>
+    <p>curated playlists for every moment</p>
+  </div>
+  <div id="playlists-container"></div>
+</div>
+
+<!-- CREATE SECTION -->
+<div id="create" class="section create-section">
+  <div class="section-header">
+    <h2>create</h2>
+    <p>daily prompts to capture the trip</p>
+  </div>
+  <div class="create-tabs">
+    <button class="create-tab active" onclick="switchCreateTab('photo')">Photography</button>
+    <button class="create-tab" onclick="switchCreateTab('art')">Art Prompts</button>
+  </div>
+  <div id="photo-challenges"></div>
+  <div id="art-prompts" style="display:none;"></div>
+</div>
+
+<!-- READ SECTION -->
+<div id="read" class="section read-section">
+  <div class="section-header">
+    <h2>reading corner</h2>
+    <p>books for the road</p>
+  </div>
+  <div class="reading-tracker">
+    <h3>Currently Reading</h3>
+    <div class="tracker-input-group">
+      <div class="input-wrap">
+        <label>Book Title</label>
+        <input type="text" id="book-title" placeholder="What are you reading?" oninput="saveReading()">
+      </div>
+    </div>
+    <div class="tracker-input-group">
+      <div class="input-wrap">
+        <label>Current Page</label>
+        <input type="number" id="current-page" placeholder="0" oninput="saveReading()">
+      </div>
+      <div class="input-wrap">
+        <label>Total Pages</label>
+        <input type="number" id="total-pages" placeholder="0" oninput="saveReading()">
+      </div>
+    </div>
+    <div class="progress-bar"><div class="fill" id="reading-fill"></div></div>
+    <p style="font-size: 0.78rem; color: var(--warm-gray); margin-top: 8px;" id="reading-percent"></p>
+  </div>
+  <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 16px;">Recommended for the Road</h3>
+  <div id="book-recs"></div>
+</div>
+
+<!-- GAMES SECTION -->
+<div id="games" class="section games-section">
+  <div class="section-header">
+    <h2>games</h2>
+    <p>for the long stretches</p>
+  </div>
+  <div class="game-tabs">
+    <button class="game-tab active" onclick="switchGameTab('trivia')">Trivia</button>
+    <button class="game-tab" onclick="switchGameTab('wyr')">Would You Rather</button>
+  </div>
+  <div id="trivia-panel" class="trivia-container"></div>
+  <div id="wyr-panel" class="wyr-container" style="display:none;"></div>
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchSection('countdown')">
+    <span class="nav-icon">&#9203;</span>
+    <span class="nav-label">Countdown</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('journey')">
+    <span class="nav-icon">&#128211;</span>
+    <span class="nav-label">Journey</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('map-section')">
+    <span class="nav-icon">&#128506;</span>
+    <span class="nav-label">Map</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('music')">
+    <span class="nav-icon">&#127925;</span>
+    <span class="nav-label">Music</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('create')">
+    <span class="nav-icon">&#128248;</span>
+    <span class="nav-label">Create</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('read')">
+    <span class="nav-icon">&#128218;</span>
+    <span class="nav-label">Read</span>
+  </button>
+  <button class="nav-item" onclick="switchSection('games')">
+    <span class="nav-icon">&#127922;</span>
+    <span class="nav-label">Games</span>
+  </button>
+</nav>
+
+<script>
+
+// ============ NAVIGATION ============
+let mapInitialized = false;
+
+function switchSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'map-section' && !mapInitialized) {
+    setTimeout(initMap, 100);
+    mapInitialized = true;
+  }
+}
+
+// ============ COUNTDOWN ============
+const DEPARTURE = new Date('2026-07-29T06:00:00');
+
+function updateCountdown() {
+  const now = new Date();
+  const diff = DEPARTURE - now;
+  if (diff <= 0) {
+    document.getElementById('cd-days').textContent = '0';
+    document.getElementById('cd-hours').textContent = '0';
+    document.getElementById('cd-mins').textContent = '0';
+    document.getElementById('cd-secs').textContent = '0';
+    return;
+  }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((diff % (1000 * 60)) / 1000);
+  document.getElementById('cd-days').textContent = days;
+  document.getElementById('cd-hours').textContent = hours;
+  document.getElementById('cd-mins').textContent = mins;
+  document.getElementById('cd-secs').textContent = secs;
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ============ BIRTHDAY MODE ============
+function toggleBirthday() {
+  const toggle = document.getElementById('birthday-toggle');
+  const banner = document.getElementById('birthday-banner');
+  toggle.classList.toggle('active');
+  banner.classList.toggle('visible');
+  localStorage.setItem('whitney-birthday', toggle.classList.contains('active'));
+}
+
+if (localStorage.getItem('whitney-birthday') === 'true') {
+  document.getElementById('birthday-toggle').classList.add('active');
+  document.getElementById('birthday-banner').classList.add('visible');
+}
+
+// ============ QUOTES ============
+const quotes = [
+  {text: "Art is not what you see, but what you make others see.", author: "Edgar Degas"},
+  {text: "The world is full of magic things, patiently waiting for our senses to grow sharper.", author: "W.B. Yeats"},
+  {text: "Not all those who wander are lost.", author: "J.R.R. Tolkien"},
+  {text: "Creativity takes courage.", author: "Henri Matisse"},
+  {text: "The earth has music for those who listen.", author: "Shakespeare"},
+  {text: "To travel is to live.", author: "Hans Christian Andersen"},
+  {text: "Every artist was first an amateur.", author: "Ralph Waldo Emerson"},
+  {text: "Music gives a soul to the universe, wings to the mind, flight to the imagination.", author: "Plato"},
+  {text: "The only way to do great work is to love what you do.", author: "Steve Jobs"},
+  {text: "Life is either a daring adventure or nothing at all.", author: "Helen Keller"},
+  {text: "I dream my painting and I paint my dream.", author: "Vincent van Gogh"},
+  {text: "Photography is the story I fail to put into words.", author: "Destin Sparks"},
+  {text: "A reader lives a thousand lives before he dies.", author: "George R.R. Martin"},
+  {text: "The mountains are calling and I must go.", author: "John Muir"},
+  {text: "Without music, life would be a mistake.", author: "Friedrich Nietzsche"},
+  {text: "In every walk with nature, one receives far more than he seeks.", author: "John Muir"},
+  {text: "Art enables us to find ourselves and lose ourselves at the same time.", author: "Thomas Merton"},
+  {text: "The journey not the arrival matters.", author: "T.S. Eliot"},
+  {text: "You can't use up creativity. The more you use, the more you have.", author: "Maya Angelou"},
+  {text: "The real voyage of discovery consists not in seeking new landscapes, but in having new eyes.", author: "Marcel Proust"},
+  {text: "Music expresses that which cannot be said and on which it is impossible to be silent.", author: "Victor Hugo"},
+  {text: "Wherever you go, go with all your heart.", author: "Confucius"},
+  {text: "Art washes away from the soul the dust of everyday life.", author: "Pablo Picasso"},
+  {text: "One's destination is never a place, but a new way of seeing things.", author: "Henry Miller"},
+  {text: "The purpose of art is washing the dust of daily life off our souls.", author: "Pablo Picasso"},
+  {text: "Take only memories, leave only footprints.", author: "Chief Seattle"},
+  {text: "Color is my daylong obsession, joy, and torment.", author: "Claude Monet"},
+  {text: "Travel makes one modest. You see what a tiny place you occupy in the world.", author: "Gustave Flaubert"},
+  {text: "Every child is an artist. The problem is how to remain an artist once we grow up.", author: "Pablo Picasso"},
+  {text: "The best journeys answer questions that in the beginning you didn't even think to ask.", author: "Jeff Johnson"}
+];
+
+function showDailyQuote() {
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const quote = quotes[dayOfYear % quotes.length];
+  document.getElementById('quote-text').textContent = quote.text;
+  document.getElementById('quote-author').textContent = '- ' + quote.author;
+}
+showDailyQuote();
+
+// ============ JOURNEY DATA ============
+const itinerary = [
+  {
+    day: 1, date: "July 29", title: "The Great Escape",
+    route: "Commerce City, CO to Burley, ID", driving: "~8 hours",
+    hotel: "Holiday Inn Express, Burley",
+    activities: [
+      "Early morning departure - watch the sunrise over the Rockies",
+      "Drive through Wyoming's wide open spaces",
+      "Cross into Idaho - new state energy",
+      "Settle into Burley for the night"
+    ],
+    suggestions: [
+      "Sketch the changing landscape from the window",
+      "Photograph the Wyoming/Idaho border sign",
+      "City of Rocks National Reserve is nearby - incredible rock formations for photos",
+      "Snake River views along the way"
+    ]
+  },
+  {
+    day: 2, date: "July 30", title: "Into the Northwest",
+    route: "Burley, ID to Ellensburg, WA", driving: "~6.5 hours",
+    hotel: "Holiday Inn Express, Ellensburg",
+    activities: [
+      "Drive through the Blue Mountains of Oregon",
+      "Cross the Columbia River into Washington",
+      "Arrive in Ellensburg - a cozy college town"
+    ],
+    suggestions: [
+      "Stop for photos at the Columbia River Gorge viewpoints",
+      "Ellensburg has a cute downtown with local art galleries",
+      "Gallery One Visual Arts Center in downtown Ellensburg",
+      "The Kittitas County Historical Museum has local art"
+    ]
+  },
+  {
+    day: 3, date: "July 31", title: "Waterfalls and Wedding Prep",
+    route: "Ellensburg, WA to Lynden, WA", driving: "~4 hours + stops",
+    hotel: "AirBnb, Lynden",
+    activities: [
+      "Drive over the Cascade Range",
+      "Stop at Deception Falls - short forest walk to waterfall",
+      "Arrive in Lynden",
+      "Trevor's rehearsal dinner at 5:50 PM"
+    ],
+    suggestions: [
+      "Deception Falls is perfect for long exposure photography (if you have a tripod)",
+      "The forest around the falls is lush and mossy - great for detail shots",
+      "Sketch the waterfall from the viewing platform",
+      "Lynden has Dutch heritage architecture - charming streets to photograph"
+    ]
+  },
+  {
+    day: 4, date: "August 1", title: "Berries and Celebrations",
+    route: "Staying in Lynden, WA", driving: "Local only",
+    hotel: "AirBnb, Lynden",
+    activities: [
+      "Morning: Pick blueberries at Barbie's Berries",
+      "Afternoon: Get ready for the wedding",
+      "Trevor's wedding in Ferndale"
+    ],
+    suggestions: [
+      "Photograph the blueberry fields - morning light is perfect",
+      "Paint a quick watercolor of the berries in your sketchbook",
+      "Wedding photography practice - candid moments are the best",
+      "Capture details: flowers, table settings, shoes, rings"
+    ]
+  },
+  {
+    day: 5, date: "August 2", title: "Crossing the Border",
+    route: "Lynden, WA to Vancouver, BC", driving: "~1.5 hours",
+    hotel: "AirBnb, Vancouver",
+    activities: [
+      "Cross the US/Canada border",
+      "Settle into the Vancouver AirBnb",
+      "Evening: Spokane Indians vs Vancouver Canadians baseball game"
+    ],
+    suggestions: [
+      "Photograph the Peace Arch at the border crossing",
+      "Granville Island Public Market - artisan shops and galleries",
+      "Baseball stadium photos - practice sports/action photography",
+      "Try sketching the stadium atmosphere"
+    ]
+  },
+
+  {
+    day: 6, date: "August 3", title: "Vancouver Day One",
+    route: "Exploring Vancouver, BC", driving: "Walking/transit",
+    hotel: "AirBnb, Vancouver",
+    activities: [
+      "Free day to explore the city",
+      "Stanley Park, Gastown, or Granville Island",
+      "Find amazing food"
+    ],
+    suggestions: [
+      "Vancouver Art Gallery - rotating exhibitions of contemporary art",
+      "Granville Island - watch glass blowers and potters work",
+      "Stanley Park seawall walk - incredible mountain/ocean views",
+      "Gastown steam clock and cobblestone streets for moody photos",
+      "Indigo Books on Robson Street - huge bookstore",
+      "Mural Festival walls in Mount Pleasant neighborhood"
+    ]
+  },
+  {
+    day: 7, date: "August 4", title: "Vancouver Day Two",
+    route: "Exploring Vancouver, BC", driving: "Walking/transit",
+    hotel: "AirBnb, Vancouver",
+    activities: [
+      "Second free day in Vancouver",
+      "Try a neighborhood you missed yesterday"
+    ],
+    suggestions: [
+      "Museum of Anthropology at UBC - stunning architecture and art",
+      "Queen Elizabeth Park - incredible city views for golden hour photos",
+      "Kitsilano Beach for sunset sketching",
+      "Commercial Drive - indie record shops and vintage stores",
+      "Dr. Sun Yat-Sen Classical Chinese Garden - peaceful photography",
+      "Find a cozy cafe and read for an afternoon"
+    ]
+  },
+  {
+    day: 8, date: "August 5", title: "Mountain Bound",
+    route: "Vancouver, BC to Radium Hot Springs, BC", driving: "~8 hours",
+    hotel: "Accommodation in Radium Hot Springs",
+    activities: [
+      "Long scenic drive through British Columbia",
+      "Rogers Pass through Glacier National Park",
+      "Arrive at Radium Hot Springs"
+    ],
+    suggestions: [
+      "This drive is one of the most scenic in Canada - camera ready",
+      "Stop at viewpoints along the Trans-Canada Highway",
+      "Sketch the mountain silhouettes from the car",
+      "The Last Spike historic site if you need a stretch break",
+      "Watch for wildlife - bears, mountain goats, elk"
+    ]
+  },
+  {
+    day: 9, date: "August 6", title: "Hot Springs and Rest",
+    route: "Radium Hot Springs, BC", driving: "None",
+    hotel: "Accommodation in Radium Hot Springs",
+    activities: [
+      "Rest day - you earned it",
+      "Soak in the hot springs",
+      "Lunch at Poutine Queen",
+      "Explore the small town"
+    ],
+    suggestions: [
+      "Paint the mountain views from your accommodation",
+      "The hot springs pool has incredible mountain backdrops",
+      "Photograph the Redstreak Restoration Trail",
+      "Sinclair Canyon - dramatic red rock walls",
+      "Sketch your poutine before you eat it",
+      "Golden hour from the Juniper Trail viewpoint"
+    ]
+  },
+  {
+    day: 10, date: "August 7", title: "Back to the States",
+    route: "Radium Hot Springs, BC to Billings, MT", driving: "~7 hours",
+    hotel: "Holiday Inn Express East, Billings",
+    activities: [
+      "Cross back into the US through Montana",
+      "Drive through big sky country",
+      "Arrive in Billings"
+    ],
+    suggestions: [
+      "Montana sunsets are legendary - time your arrival for golden hour",
+      "Photograph the vast Montana landscape",
+      "Yellowstone Art Museum in Billings (if arriving early enough)",
+      "This Bookstore in Billings - local independent shop",
+      "Rimrock views over the city at sunset"
+    ]
+  },
+  {
+    day: 11, date: "August 8", title: "The Long Way Home",
+    route: "Billings, MT to Commerce City, CO", driving: "~9 hours",
+    hotel: "Home sweet home!",
+    activities: [
+      "Final driving day",
+      "Through Wyoming one more time",
+      "Watch the Rockies appear on the horizon",
+      "HOME!"
+    ],
+    suggestions: [
+      "Document the final moments of the trip",
+      "Photograph the 'Welcome to Colorado' sign",
+      "Reflect on your favorite moments",
+      "Start planning your road trip scrapbook or photo book"
+    ]
+  }
+];
+
+function renderJourney() {
+  const container = document.getElementById('journey-cards');
+  container.innerHTML = itinerary.map(day => `
+    <div class="day-card">
+      <div class="day-header">
+        <span class="day-number">Day ${day.day}</span>
+        <span class="day-date">${day.date}</span>
+      </div>
+      <h3>${day.title}</h3>
+      <div class="route-info">&#128205; ${day.route} ${day.driving !== 'None' && day.driving !== 'Local only' && day.driving !== 'Walking/transit' ? '- ' + day.driving : ''}</div>
+      <ul class="activities">
+        ${day.activities.map(a => `<li>${a}</li>`).join('')}
+      </ul>
+      <div class="suggestions">
+        <h4>Whitney's Picks</h4>
+        <ul class="activities">
+          ${day.suggestions.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+renderJourney();
+
+// ============ MAP ============
+function initMap() {
+  const map = L.map('map', { scrollWheelZoom: true }).setView([46.5, -115], 5);
+  
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: 'Map data: OpenTopoMap'
+  }).addTo(map);
+
+  const stops = [
+    {name: "Commerce City, CO", lat: 39.8083, lng: -104.9339, type: "home"},
+    {name: "Burley, ID", lat: 42.5357, lng: -113.7928, type: "stay"},
+    {name: "Ellensburg, WA", lat: 46.9965, lng: -120.5478, type: "stay"},
+    {name: "Deception Falls", lat: 47.7172, lng: -121.1936, type: "activity"},
+    {name: "Lynden, WA", lat: 48.9465, lng: -122.4527, type: "stay"},
+    {name: "Ferndale, WA", lat: 48.8465, lng: -122.5910, type: "activity"},
+    {name: "Vancouver, BC", lat: 49.2827, lng: -123.1207, type: "stay"},
+    {name: "Radium Hot Springs, BC", lat: 50.6198, lng: -116.0734, type: "stay"},
+    {name: "Billings, MT", lat: 45.7833, lng: -108.5007, type: "stay"},
+  ];
+
+  const routeCoords = [
+    [39.8083, -104.9339],
+    [41.1400, -104.8202],
+    [42.5357, -113.7928],
+    [42.8713, -115.7930],
+    [43.6150, -116.2023],
+    [44.8010, -117.4340],
+    [46.2104, -119.2068],
+    [46.9965, -120.5478],
+    [47.7172, -121.1936],
+    [48.9465, -122.4527],
+    [49.2827, -123.1207],
+    [49.3838, -121.4419],
+    [50.6198, -116.0734],
+    [49.0000, -114.0000],
+    [47.5000, -110.5000],
+    [45.7833, -108.5007],
+    [44.7631, -108.1200],
+    [42.8666, -106.3131],
+    [41.1400, -104.8202],
+    [39.8083, -104.9339]
+  ];
+
+  L.polyline(routeCoords, {
+    color: '#c4a0a0',
+    weight: 3,
+    opacity: 0.8,
+    dashArray: '8, 8'
+  }).addTo(map);
+
+  stops.forEach(stop => {
+    let color = stop.type === 'home' ? '#c4a0a0' : stop.type === 'activity' ? '#c4a94d' : '#9caa97';
+    let radius = stop.type === 'home' ? 10 : 7;
+    L.circleMarker([stop.lat, stop.lng], {
+      radius: radius,
+      fillColor: color,
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 0.9
+    }).addTo(map).bindPopup(`<strong style="font-family: 'Playfair Display', serif;">${stop.name}</strong>`);
+  });
+}
+
+// ============ MUSIC / PLAYLISTS ============
+const playlists = [
+  {
+    name: "The Great Escape",
+    vibe: "Departure day energy - windows down, adventure ahead",
+    songs: [
+      {title: "I Will Wait", artist: "Mumford & Sons"},
+      {title: "Stick Season", artist: "Noah Kahan"},
+      {title: "Shut Up and Dance", artist: "Walk the Moon"},
+      {title: "Ho Hey", artist: "The Lumineers"},
+      {title: "Ride", artist: "Twenty One Pilots"},
+      {title: "Little Lion Man", artist: "Mumford & Sons"},
+      {title: "Peach Pit", artist: "Peach Pit"},
+      {title: "Electric Feel", artist: "MGMT"},
+      {title: "Brand New", artist: "Ben Rector"},
+      {title: "All I Want", artist: "Kodaline"}
+    ]
+  },
+  {
+    name: "Mountain Windows",
+    vibe: "Scenic drives through passes and pines - folk and warmth",
+    songs: [
+      {title: "The Cave", artist: "Mumford & Sons"},
+      {title: "Northern Attitude", artist: "Noah Kahan"},
+      {title: "Stubborn Love", artist: "The Lumineers"},
+      {title: "Bloom", artist: "The Paper Kites"},
+      {title: "Holocene", artist: "Bon Iver"},
+      {title: "Take Me Home, Country Roads", artist: "John Denver"},
+      {title: "Big Yellow Taxi", artist: "Joni Mitchell"},
+      {title: "Lavender Haze", artist: "Taylor Swift"},
+      {title: "Apple Orchard", artist: "Mt. Joy"},
+      {title: "Ophelia", artist: "The Lumineers"}
+    ]
+  },
+  {
+    name: "Pacific Northwest Mood",
+    vibe: "Misty forests, coffee shops, indie everything",
+    songs: [
+      {title: "Come As You Are", artist: "Nirvana"},
+      {title: "Motion Sickness", artist: "Phoebe Bridgers"},
+      {title: "Close to You", artist: "Gracie Abrams"},
+      {title: "Dreams", artist: "Fleetwood Mac"},
+      {title: "Everywhere", artist: "Fleetwood Mac"},
+      {title: "All Too Well (10 Min)", artist: "Taylor Swift"},
+      {title: "Mess Is Mine", artist: "Vance Joy"},
+      {title: "In the Aeroplane Over the Sea", artist: "Neutral Milk Hotel"},
+      {title: "Cigarette Daydreams", artist: "Cage the Elephant"},
+      {title: "Kyoto", artist: "Phoebe Bridgers"}
+    ]
+  },
+  {
+    name: "City Walks",
+    vibe: "Vancouver exploring - upbeat but cool",
+    songs: [
+      {title: "Ain't No Rest for the Wicked", artist: "Cage the Elephant"},
+      {title: "Tongue Tied", artist: "Grouplove"},
+      {title: "Risk", artist: "Gracie Abrams"},
+      {title: "Alors on Danse", artist: "Stromae"},
+      {title: "Karma", artist: "Taylor Swift"},
+      {title: "Where Did All the Time Go", artist: "Ben Rector"},
+      {title: "Smells Like Teen Spirit", artist: "Nirvana"},
+      {title: "Peach", artist: "Caamp"},
+      {title: "Stolen Dance", artist: "Milky Chance"},
+      {title: "Fever Dream", artist: "Mt. Joy"}
+    ]
+  },
+  {
+    name: "Golden Hour",
+    vibe: "Hot springs sunsets and mountain evenings - warm and mellow",
+    songs: [
+      {title: "Cherry Wine", artist: "Hozier"},
+      {title: "Harvest Moon", artist: "Neil Young"},
+      {title: "I Miss You, I'm Sorry", artist: "Gracie Abrams"},
+      {title: "Lover", artist: "Taylor Swift"},
+      {title: "Sigh No More", artist: "Mumford & Sons"},
+      {title: "Orange Juice", artist: "Noah Kahan"},
+      {title: "Flightless Bird", artist: "Iron and Wine"},
+      {title: "Like Real People Do", artist: "Hozier"},
+      {title: "By and By", artist: "Caamp"},
+      {title: "Old Pine", artist: "Ben Howard"}
+    ]
+  },
+  {
+    name: "The Long Way Home",
+    vibe: "Final stretch - reflective, grateful, a little bittersweet",
+    songs: [
+      {title: "Home", artist: "Edward Sharpe & The Magnetic Zeros"},
+      {title: "Somewhere Only We Know", artist: "Keane"},
+      {title: "The Night We Met", artist: "Lord Huron"},
+      {title: "Growing Sideways", artist: "Noah Kahan"},
+      {title: "Forever", artist: "Ben Rector"},
+      {title: "After the Storm", artist: "Mumford & Sons"},
+      {title: "august", artist: "Taylor Swift"},
+      {title: "The Chain", artist: "Fleetwood Mac"},
+      {title: "That Funny Feeling", artist: "Phoebe Bridgers"},
+      {title: "Fade Into You", artist: "Mazzy Star"}
+    ]
+  }
+];
+
+function renderPlaylists() {
+  const container = document.getElementById('playlists-container');
+  container.innerHTML = playlists.map((pl, idx) => `
+    <div class="playlist-card" onclick="togglePlaylist(this)">
+      <div class="playlist-header">
+        <div>
+          <h3>${pl.name}</h3>
+          <p class="playlist-vibe">${pl.vibe}</p>
+        </div>
+        <span class="expand-icon">&#9660;</span>
+      </div>
+      <div class="playlist-songs">
+        ${pl.songs.map(s => `
+          <div class="song-item">
+            <div class="song-info">
+              <div class="song-title">${s.title}</div>
+              <div class="song-artist">${s.artist}</div>
+            </div>
+            <a href="https://open.spotify.com/search/${encodeURIComponent(s.title + ' ' + s.artist)}" target="_blank" class="spotify-link">Spotify</a>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function togglePlaylist(el) {
+  el.classList.toggle('expanded');
+}
+
+renderPlaylists();
+
+// ============ PHOTO CHALLENGES ============
+const photoChallenges = [
+  {day: 1, title: "Golden Hour Silhouette", desc: "Catch someone's outline against the sunrise or sunset sky"},
+  {day: 2, title: "Leading Lines", desc: "Find a road, fence, or river that pulls the eye into the distance"},
+  {day: 3, title: "Something Blue", desc: "A waterfall, the sky, a sign - find the most beautiful blue you can"},
+  {day: 4, title: "Tiny Details", desc: "Macro mode - photograph something smaller than your thumbnail"},
+  {day: 5, title: "Through a Window", desc: "Shoot through glass - car window, cafe window, any frame within a frame"},
+  {day: 6, title: "Reflections", desc: "Water, mirrors, glass buildings - find a perfect reflection"},
+  {day: 7, title: "Street Portrait", desc: "Capture someone in their element (ask first if they're a stranger!)"},
+  {day: 8, title: "Rule of Thirds Landscape", desc: "Compose a landscape with the horizon on the top or bottom third line"},
+  {day: 9, title: "Shadow Play", desc: "Find interesting shadows - yours, a tree's, architectural ones"},
+  {day: 10, title: "Texture Closeup", desc: "Bark, brick, fabric, water ripples - get close and fill the frame"},
+  {day: 11, title: "The In-Between Moments", desc: "Candid shots of your family when they don't know you're shooting"}
+];
+
+const artPrompts = [
+  {day: 1, title: "Road Trip Essentials", desc: "Quick sketch of everything you packed that you're most excited about"},
+  {day: 2, title: "Window Landscapes", desc: "Paint the view from the car window in watercolor - embrace the blur"},
+  {day: 3, title: "Waterfall Study", desc: "Sketch Deception Falls - focus on how water moves over rocks"},
+  {day: 4, title: "Botanical Close-Up", desc: "Draw a single blueberry branch with leaves in detail"},
+  {day: 5, title: "City Skyline Silhouette", desc: "Paint Vancouver's skyline as a simple silhouette against the sky"},
+  {day: 6, title: "Market Colors", desc: "Quick color study of fruit/flowers at a market or in the city"},
+  {day: 7, title: "Architecture Details", desc: "Sketch a doorway, window, or interesting building detail you pass"},
+  {day: 8, title: "Mountain Layers", desc: "Paint the mountain ranges layered - each ridge a different value"},
+  {day: 9, title: "Hot Springs Steam", desc: "Abstract watercolor study - how do you paint steam and warmth?"},
+  {day: 10, title: "Big Sky", desc: "Paint the Montana sky - try to capture how impossibly huge it is"},
+  {day: 11, title: "Trip Memory Map", desc: "Draw a hand-illustrated map of the whole trip from memory"}
+];
+
+function renderChallenges() {
+  const completed = JSON.parse(localStorage.getItem('whitney-photos') || '[]');
+  const container = document.getElementById('photo-challenges');
+  container.innerHTML = photoChallenges.map((ch, idx) => `
+    <div class="challenge-card ${completed.includes(idx) ? 'completed' : ''}" onclick="toggleChallenge('photo', ${idx})">
+      <div class="day-badge">${ch.day}</div>
+      <div class="challenge-content">
+        <h4>${ch.title}</h4>
+        <p>${ch.desc}</p>
+      </div>
+      <div class="check-circle">${completed.includes(idx) ? '&#10003;' : ''}</div>
+    </div>
+  `).join('');
+}
+
+function renderArtPrompts() {
+  const completed = JSON.parse(localStorage.getItem('whitney-art') || '[]');
+  const container = document.getElementById('art-prompts');
+  container.innerHTML = artPrompts.map((ch, idx) => `
+    <div class="challenge-card ${completed.includes(idx) ? 'completed' : ''}" onclick="toggleChallenge('art', ${idx})">
+      <div class="day-badge">${ch.day}</div>
+      <div class="challenge-content">
+        <h4>${ch.title}</h4>
+        <p>${ch.desc}</p>
+      </div>
+      <div class="check-circle">${completed.includes(idx) ? '&#10003;' : ''}</div>
+    </div>
+  `).join('');
+}
+
+function toggleChallenge(type, idx) {
+  const key = type === 'photo' ? 'whitney-photos' : 'whitney-art';
+  let completed = JSON.parse(localStorage.getItem(key) || '[]');
+  if (completed.includes(idx)) {
+    completed = completed.filter(i => i !== idx);
+  } else {
+    completed.push(idx);
+  }
+  localStorage.setItem(key, JSON.stringify(completed));
+  if (type === 'photo') renderChallenges();
+  else renderArtPrompts();
+}
+
+function switchCreateTab(tab) {
+  document.querySelectorAll('.create-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('photo-challenges').style.display = tab === 'photo' ? 'block' : 'none';
+  document.getElementById('art-prompts').style.display = tab === 'art' ? 'block' : 'none';
+}
+
+renderChallenges();
+renderArtPrompts();
+
+// ============ READING ============
+const bookRecs = [
+  {title: "The Inheritance Games", author: "Jennifer Lynn Barnes", desc: "A stranger inherits a billionaire's fortune over his own family. Full of puzzles, secrets, and twists you won't see coming. If you haven't read it yet - start here."},
+  {title: "One of Us Is Lying", author: "Karen M. McManus", desc: "Five students walk into detention. Only four walk out alive. A thriller with an unreliable narrator that keeps you guessing until the last page."},
+  {title: "A Good Girl's Guide to Murder", author: "Holly Jackson", desc: "Pip is convinced the wrong person was convicted. Her school project becomes an investigation that uncovers dark secrets. Addictive and twisty."},
+  {title: "The Hawthorne Legacy", author: "Jennifer Lynn Barnes", desc: "The sequel to Inheritance Games. More puzzles, more Hawthorne brothers, more danger. Perfect if you need a series to devour on the road."},
+  {title: "We Were Liars", author: "E. Lockhart", desc: "A wealthy family. A private island. A summer you won't forget. Short, devastating, and best read in one sitting on a long drive day."},
+  {title: "Truly Devious", author: "Maureen Johnson", desc: "A cold case murder mystery at a boarding school. Dual timelines, hidden clues, and an incredibly satisfying mystery to solve."},
+  {title: "The Darkest Minds", author: "Alexandra Bracken", desc: "Kids develop dangerous abilities. The government locks them up. One escapes. Dystopian thriller that hits hard and fast."},
+  {title: "House of Hollow", author: "Krystal Sutherland", desc: "Three sisters disappeared as children. When they came back, they were different. Gothic, creepy, and atmospheric - Stranger Things vibes."},
+  {title: "All the Bright Places", author: "Jennifer Niven", desc: "Two teens discover the best parts of Indiana and the hardest parts of life. Beautiful, heartbreaking, and perfect for a road trip read."},
+  {title: "In the Woods", author: "Tana French", desc: "A detective investigates a murder in the woods where his childhood friends disappeared. Literary thriller that's gorgeously written and haunting."}
+];
+
+function renderBookRecs() {
+  document.getElementById('book-recs').innerHTML = bookRecs.map(b => `
+    <div class="book-rec">
+      <h4>${b.title}</h4>
+      <p class="book-author">${b.author}</p>
+      <p class="book-desc">${b.desc}</p>
+    </div>
+  `).join('');
+}
+
+function saveReading() {
+  const title = document.getElementById('book-title').value;
+  const current = document.getElementById('current-page').value;
+  const total = document.getElementById('total-pages').value;
+  localStorage.setItem('whitney-reading', JSON.stringify({title, current, total}));
+  updateReadingProgress();
+}
+
+function loadReading() {
+  const data = JSON.parse(localStorage.getItem('whitney-reading') || '{}');
+  if (data.title) document.getElementById('book-title').value = data.title;
+  if (data.current) document.getElementById('current-page').value = data.current;
+  if (data.total) document.getElementById('total-pages').value = data.total;
+  updateReadingProgress();
+}
+
+function updateReadingProgress() {
+  const current = parseInt(document.getElementById('current-page').value) || 0;
+  const total = parseInt(document.getElementById('total-pages').value) || 1;
+  const pct = Math.min(100, Math.round((current / total) * 100));
+  document.getElementById('reading-fill').style.width = pct + '%';
+  document.getElementById('reading-percent').textContent = total > 1 ? pct + '% complete' : '';
+}
+
+renderBookRecs();
+loadReading();
+
+// ============ TRIVIA ============
+const triviaQuestions = [
+  // Music - General + Her Artists
+  {q: "Which Mumford & Sons album features 'I Will Wait'?", options: ["Sigh No More", "Babel", "Wilder Mind", "Delta"], answer: 1, cat: "Music"},
+  {q: "Noah Kahan is from which US state?", options: ["Vermont", "Maine", "New Hampshire", "Massachusetts"], answer: 0, cat: "Music"},
+  {q: "What was Nirvana's lead singer's name?", options: ["Eddie Vedder", "Kurt Cobain", "Chris Cornell", "Layne Staley"], answer: 1, cat: "Music"},
+  {q: "Taylor Swift's 'Folklore' was released during which year?", options: ["2019", "2020", "2021", "2022"], answer: 1, cat: "Music"},
+  {q: "What instrument does Marcus Mumford primarily play in concert?", options: ["Guitar", "Piano", "Banjo", "Drums/Guitar"], answer: 3, cat: "Music"},
+  {q: "Which Gracie Abrams song was her first Billboard Hot 100 hit?", options: ["I Miss You, I'm Sorry", "Close to You", "That's So True", "21"], answer: 2, cat: "Music"},
+  {q: "Nirvana was formed in which city?", options: ["Seattle", "Aberdeen", "Portland", "Olympia"], answer: 1, cat: "Music"},
+  {q: "Ben Rector's song 'Brand New' is about what?", options: ["A new car", "Seeing the world with fresh eyes", "A breakup", "Moving to a new city"], answer: 1, cat: "Music"},
+  {q: "Noah Kahan's 'Stick Season' is named after a season in Vermont between what?", options: ["Winter and spring", "Fall foliage and winter", "Summer and fall", "Spring and summer"], answer: 1, cat: "Music"},
+  {q: "Which Taylor Swift album is considered country?", options: ["1989", "Reputation", "Fearless", "Midnights"], answer: 2, cat: "Music"},
+  {q: "Fleetwood Mac's 'Rumours' was largely inspired by what?", options: ["A road trip", "Band members' breakups", "A dream", "Political events"], answer: 1, cat: "Music"},
+  {q: "What genre is Hozier's music primarily classified as?", options: ["Pop", "Indie folk/soul", "R&B", "Alternative rock"], answer: 1, cat: "Music"},
+  // Art & Art History
+  {q: "Who painted 'Starry Night'?", options: ["Claude Monet", "Vincent van Gogh", "Pablo Picasso", "Salvador Dali"], answer: 1, cat: "Art"},
+  {q: "What art movement is Claude Monet associated with?", options: ["Surrealism", "Impressionism", "Cubism", "Expressionism"], answer: 1, cat: "Art"},
+  {q: "What is the golden ratio approximately equal to?", options: ["1.414", "1.618", "2.718", "3.14"], answer: 1, cat: "Art"},
+  {q: "Watercolor paints are made with pigment suspended in what?", options: ["Oil", "Gum arabic", "Egg yolk", "Wax"], answer: 1, cat: "Art"},
+  {q: "Who is known for painting melting clocks?", options: ["Picasso", "Magritte", "Dali", "Warhol"], answer: 2, cat: "Art"},
+  {q: "What primary colors do you mix to get purple?", options: ["Red and yellow", "Blue and yellow", "Red and blue", "Blue and green"], answer: 2, cat: "Art"},
+  {q: "Frida Kahlo was from which country?", options: ["Spain", "Argentina", "Mexico", "Brazil"], answer: 2, cat: "Art"},
+  {q: "What does 'chiaroscuro' refer to in art?", options: ["Color harmony", "Contrast of light and dark", "Perspective", "Texture"], answer: 1, cat: "Art"},
+  {q: "Which art tool is made of charred wood?", options: ["Graphite", "Charcoal", "Conte crayon", "Pastel"], answer: 1, cat: "Art"},
+  {q: "The Mona Lisa is displayed in which museum?", options: ["The Met", "British Museum", "The Louvre", "Uffizi Gallery"], answer: 2, cat: "Art"},
+  {q: "What Japanese art form involves folding paper?", options: ["Ikebana", "Origami", "Kintsugi", "Sumi-e"], answer: 1, cat: "Art"},
+  {q: "What is the complementary color of blue?", options: ["Green", "Purple", "Orange", "Red"], answer: 2, cat: "Art"},
+
+  // Geography - Trip Related
+  {q: "What is the capital of British Columbia?", options: ["Vancouver", "Victoria", "Kelowna", "Surrey"], answer: 1, cat: "Geography"},
+  {q: "Which US state is known as 'Big Sky Country'?", options: ["Wyoming", "Montana", "Idaho", "Colorado"], answer: 1, cat: "Geography"},
+  {q: "The Columbia River forms the border between which two states?", options: ["Idaho and Montana", "Oregon and Washington", "California and Oregon", "Nevada and Idaho"], answer: 1, cat: "Geography"},
+  {q: "What mountain range runs through Washington state?", options: ["Rocky Mountains", "Sierra Nevada", "Cascade Range", "Blue Ridge"], answer: 2, cat: "Geography"},
+  {q: "Vancouver, BC sits on the coast of which ocean?", options: ["Atlantic", "Arctic", "Indian", "Pacific"], answer: 3, cat: "Geography"},
+  {q: "Radium Hot Springs is in which Canadian province?", options: ["Alberta", "British Columbia", "Saskatchewan", "Manitoba"], answer: 1, cat: "Geography"},
+  {q: "What is the tallest peak in Washington state?", options: ["Mt. Baker", "Mt. Rainier", "Mt. Adams", "Mt. Olympus"], answer: 1, cat: "Geography"},
+  {q: "Idaho is the leading US producer of which crop?", options: ["Corn", "Wheat", "Potatoes", "Soybeans"], answer: 2, cat: "Geography"},
+  {q: "Which Canadian city hosted the 2010 Winter Olympics?", options: ["Toronto", "Montreal", "Calgary", "Vancouver"], answer: 3, cat: "Geography"},
+  {q: "The Snake River flows through which state on your route?", options: ["Montana", "Idaho", "Washington", "Wyoming"], answer: 1, cat: "Geography"},
+  // Pop Culture
+  {q: "In Stranger Things, what is Eleven's favorite food?", options: ["Pizza", "Eggos", "Candy bars", "Hot dogs"], answer: 1, cat: "Pop Culture"},
+  {q: "What year did the original Stranger Things events take place?", options: ["1983", "1984", "1985", "1986"], answer: 0, cat: "Pop Culture"},
+  {q: "In the Divergent series, what faction values bravery?", options: ["Abnegation", "Erudite", "Dauntless", "Amity"], answer: 2, cat: "Pop Culture"},
+  {q: "What is the name of the dimension in Stranger Things?", options: ["The Other Side", "The Upside Down", "The Underneath", "The Shadow World"], answer: 1, cat: "Pop Culture"},
+  {q: "In The Inheritance Games, what is the name of the mansion?", options: ["Blackwood Manor", "Hawthorne House", "Winchester Estate", "Davenport Hall"], answer: 1, cat: "Pop Culture"},
+  {q: "Who plays Eleven in Stranger Things?", options: ["Sadie Sink", "Millie Bobby Brown", "Natalia Dyer", "Maya Hawke"], answer: 1, cat: "Pop Culture"},
+  {q: "In Divergent, what faction does Tris originally belong to?", options: ["Dauntless", "Erudite", "Candor", "Abnegation"], answer: 3, cat: "Pop Culture"},
+  {q: "What town is Stranger Things set in?", options: ["Hawkins, Indiana", "Riverdale, Ohio", "Derry, Maine", "Castle Rock"], answer: 0, cat: "Pop Culture"},
+  {q: "How many Hawthorne grandsons are there in The Inheritance Games?", options: ["Two", "Three", "Four", "Five"], answer: 2, cat: "Pop Culture"},
+  {q: "What is the name of the monster in Stranger Things Season 1?", options: ["The Mind Flayer", "The Demogorgon", "Vecna", "The Demodogs"], answer: 1, cat: "Pop Culture"},
+
+  // Photography
+  {q: "What does ISO control in photography?", options: ["Focus", "Light sensitivity", "Shutter speed", "Aperture"], answer: 1, cat: "Photography"},
+  {q: "The 'rule of thirds' divides the frame into how many sections?", options: ["4", "6", "9", "12"], answer: 2, cat: "Photography"},
+  {q: "What time of day is 'golden hour'?", options: ["Noon", "Shortly after sunrise / before sunset", "Midnight", "Mid-afternoon"], answer: 1, cat: "Photography"},
+  {q: "A lower f-stop number means what?", options: ["More in focus", "Less light", "Shallower depth of field", "Slower shutter"], answer: 2, cat: "Photography"},
+  {q: "What is 'bokeh'?", options: ["A type of lens", "Blurred background aesthetic", "A filter", "A camera brand"], answer: 1, cat: "Photography"},
+  {q: "What does a wider aperture look like in a photo?", options: ["Everything sharp", "Blurry subject", "Blurry background, sharp subject", "Overexposed"], answer: 2, cat: "Photography"},
+  {q: "Leading lines in photography do what?", options: ["Frame the subject", "Guide the viewer's eye", "Create symmetry", "Add color"], answer: 1, cat: "Photography"},
+  {q: "What is 'blue hour'?", options: ["Noon", "Just before sunrise or after sunset", "During rain", "Midnight"], answer: 1, cat: "Photography"},
+  {q: "What does DSLR stand for?", options: ["Digital Single Lens Reflex", "Digital Super Light Range", "Direct Sensor Lens Reader", "Dynamic Single Lens Recorder"], answer: 0, cat: "Photography"},
+  {q: "Negative space in a photo refers to what?", options: ["Dark areas", "The empty area around the subject", "Underexposed sections", "Shadows"], answer: 1, cat: "Photography"},
+  // Science
+  {q: "Hot springs are heated by what geological process?", options: ["Solar energy", "Geothermal energy", "Chemical reactions", "Friction"], answer: 1, cat: "Science"},
+  {q: "What causes the Northern Lights?", options: ["Moonlight reflection", "Solar wind hitting atmosphere", "Volcanic gases", "Cloud refraction"], answer: 1, cat: "Science"},
+  {q: "The Cascade Range volcanoes are caused by what?", options: ["Hotspot", "Divergent boundary", "Subduction zone", "Transform fault"], answer: 2, cat: "Science"},
+  {q: "What mineral gives Radium Hot Springs its name?", options: ["Calcium", "Radium", "Sulfur", "Lithium"], answer: 1, cat: "Science"},
+  {q: "At what temperature (F) does water boil at sea level?", options: ["200", "212", "220", "232"], answer: 1, cat: "Science"},
+  {q: "What gas makes up most of Earth's atmosphere?", options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], answer: 2, cat: "Science"},
+  {q: "Mountains form primarily through what process?", options: ["Erosion", "Tectonic plate collision", "Volcanic eruption only", "Glaciation"], answer: 1, cat: "Science"},
+  {q: "What causes tides?", options: ["Wind", "Earth's rotation only", "Moon's gravitational pull", "Ocean currents"], answer: 2, cat: "Science"},
+  {q: "Poutine originates from which Canadian province?", options: ["British Columbia", "Ontario", "Quebec", "Alberta"], answer: 2, cat: "Science"},
+  {q: "What type of rock is most commonly found in hot springs areas?", options: ["Sedimentary", "Igneous", "Metamorphic", "All types equally"], answer: 1, cat: "Science"},
+  // Books/Literature
+  {q: "Who wrote the Divergent series?", options: ["Suzanne Collins", "Veronica Roth", "James Dashner", "Marie Lu"], answer: 1, cat: "Books"},
+  {q: "In what genre would you classify The Inheritance Games?", options: ["Fantasy", "Sci-fi", "Mystery/Thriller", "Romance"], answer: 2, cat: "Books"},
+  {q: "What is the first book in the Hunger Games series called?", options: ["Catching Fire", "Mockingjay", "The Hunger Games", "The Ballad of Songbirds and Snakes"], answer: 2, cat: "Books"},
+  {q: "A 'red herring' in a mystery novel is what?", options: ["A clue that leads nowhere", "The murder weapon", "The detective's sidekick", "A chapter title"], answer: 0, cat: "Books"},
+  {q: "Which Shakespeare play features the quote 'to be or not to be'?", options: ["Macbeth", "Romeo and Juliet", "Hamlet", "Othello"], answer: 2, cat: "Books"},
+  {q: "What is a 'plot twist'?", options: ["A writing technique for dialogue", "An unexpected change in the story direction", "The climax of every story", "A type of chapter ending"], answer: 1, cat: "Books"},
+  {q: "Jennifer Lynn Barnes studied what subject at Yale?", options: ["English", "Psychology", "Mathematics", "Cognitive Science"], answer: 3, cat: "Books"},
+  {q: "How many factions exist in the Divergent world?", options: ["3", "4", "5", "6"], answer: 2, cat: "Books"},
+  {q: "What is an 'unreliable narrator'?", options: ["A narrator who lies or has limited perspective", "A boring narrator", "A third-person narrator", "A narrator who dies"], answer: 0, cat: "Books"},
+  {q: "What literary device uses 'like' or 'as' for comparison?", options: ["Metaphor", "Simile", "Alliteration", "Personification"], answer: 1, cat: "Books"},
+];
+
+let triviaState = {
+  current: 0,
+  score: 0,
+  answered: false,
+  order: []
+};
+
+function shuffleTrivia() {
+  triviaState.order = [...Array(triviaQuestions.length).keys()];
+  for (let i = triviaState.order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [triviaState.order[i], triviaState.order[j]] = [triviaState.order[j], triviaState.order[i]];
+  }
+  triviaState.current = 0;
+  triviaState.score = 0;
+  triviaState.answered = false;
+}
+
+function renderTrivia() {
+  if (triviaState.order.length === 0) shuffleTrivia();
+  const idx = triviaState.order[triviaState.current];
+  const q = triviaQuestions[idx];
+  const panel = document.getElementById('trivia-panel');
+  panel.innerHTML = `
+    <p class="trivia-score">Question ${triviaState.current + 1} of ${triviaState.order.length} | Score: ${triviaState.score}</p>
+    <p class="trivia-category">${q.cat}</p>
+    <div class="trivia-question-card">
+      <h3>${q.q}</h3>
+    </div>
+    <div class="trivia-options">
+      ${q.options.map((opt, i) => `
+        <button class="trivia-option" onclick="answerTrivia(${i}, ${q.answer})" ${triviaState.answered ? 'disabled' : ''}>${opt}</button>
+      `).join('')}
+    </div>
+    <button class="trivia-next-btn" onclick="nextTrivia()" style="${triviaState.answered ? '' : 'opacity:0.4; pointer-events:none;'}">Next Question</button>
+  `;
+}
+
+function answerTrivia(selected, correct) {
+  if (triviaState.answered) return;
+  triviaState.answered = true;
+  const options = document.querySelectorAll('.trivia-option');
+  options[correct].classList.add('correct');
+  if (selected !== correct) {
+    options[selected].classList.add('incorrect');
+  } else {
+    triviaState.score++;
+  }
+  options.forEach(o => o.disabled = true);
+  document.querySelector('.trivia-next-btn').style.opacity = '1';
+  document.querySelector('.trivia-next-btn').style.pointerEvents = 'auto';
+  localStorage.setItem('whitney-trivia-score', triviaState.score);
+}
+
+function nextTrivia() {
+  triviaState.current++;
+  if (triviaState.current >= triviaState.order.length) {
+    shuffleTrivia();
+  }
+  triviaState.answered = false;
+  renderTrivia();
+}
+
+renderTrivia();
+
+// ============ WOULD YOU RATHER ============
+const wyrQuestions = [
+  {a: "Only listen to one album for the rest of your life", b: "Never be able to listen to your current favorite song again"},
+  {a: "Have the ability to paint photorealistic paintings instantly", b: "Have the ability to play any instrument perfectly"},
+  {a: "Travel to every country but never take photos", b: "Stay in one city but have unlimited photography gear"},
+  {a: "Live inside a Taylor Swift music video", b: "Live inside a Stranger Things episode (safely)"},
+  {a: "Only read books from one genre forever", b: "Only read one book per year but any genre"},
+  {a: "Have a private art studio in a mountain cabin", b: "Have a private art studio in a NYC loft"},
+  {a: "See every sunrise for a year", b: "See every sunset for a year"},
+  {a: "Be able to sketch anything in under 30 seconds", b: "Take a perfect photo every single time"},
+  {a: "Road trip across the US for 3 months", b: "Backpack across Europe for 1 month"},
+  {a: "Always know what song is playing", b: "Always know the name of any painting you see"},
+  {a: "Have your art displayed in a museum", b: "Have a song written about you"},
+  {a: "Only use watercolors forever", b: "Only use charcoal/pencil forever"},
+  {a: "Meet your favorite author", b: "Meet your favorite musician"},
+  {a: "Live in the world of Divergent", b: "Live in the world of The Inheritance Games"},
+  {a: "Be the lead singer of a band", b: "Be a famous solo artist"},
+  {a: "Photograph a National Geographic cover", b: "Illustrate a New Yorker cover"},
+  {a: "Read minds but only while making eye contact", b: "See 5 minutes into your own future"},
+  {a: "Live in a world with no music", b: "Live in a world with no color"},
+  {a: "Write a bestselling novel", b: "Direct a critically acclaimed film"},
+  {a: "Have unlimited art supplies", b: "Have unlimited books"},
+  {a: "Spend a day with Phoebe Bridgers", b: "Spend a day with Noah Kahan"},
+  {a: "Always have the perfect playlist for any mood", b: "Always know exactly what to read next"},
+  {a: "Travel only by train", b: "Travel only by road trip"},
+  {a: "Be an incredible painter with no guitar skills", b: "Be an incredible guitarist with no painting skills"},
+  {a: "Live in the Pacific Northwest", b: "Live in a European mountain village"},
+  {a: "Only watch thriller movies", b: "Only watch comedies"},
+  {a: "Have a photographic memory", b: "Have perfect pitch"},
+  {a: "Never use social media again", b: "Never watch TV/movies again"},
+  {a: "Explore an abandoned building (safely)", b: "Explore a hidden cave system (safely)"},
+  {a: "Always have fresh flowers in your room", b: "Always have candles burning in your room"},
+  {a: "Be a character in Stranger Things season 1", b: "Be a character in The Inheritance Games"},
+  {a: "Go to a music festival with your best friends", b: "Go on a solo creative retreat for a week"},
+  {a: "Have synesthesia (see sounds as colors)", b: "Have perfect spatial awareness (draw anything from memory)"},
+  {a: "Time travel to see any concert in history", b: "Time travel to meet any artist in history"},
+  {a: "Always have messy paint hands", b: "Always have ink-stained fingers"},
+  {a: "Be famous for your art after you die", b: "Be moderately known for your art while alive"},
+  {a: "Live in a cozy bookshop", b: "Live in an art-filled greenhouse"},
+  {a: "Only shoot on film cameras", b: "Only shoot on the newest digital cameras"},
+  {a: "Spend a whole day in the world's best library", b: "Spend a whole day in the world's best art museum"},
+  {a: "Have a conversation with a fictional character", b: "Have a conversation with a historical figure"},
+  {a: "Be able to see in the dark", b: "Be able to breathe underwater"},
+  {a: "Perform one song on stage at a sold-out arena", b: "Have your artwork displayed in Times Square for a day"},
+  {a: "Always be cozy-warm", b: "Never be too hot"},
+  {a: "Only drink coffee for life", b: "Only drink tea for life"},
+  {a: "Write the lyrics to a hit song", b: "Take the photo that goes viral"},
+  {a: "Live in a world that always looks like golden hour", b: "Live in a world that always sounds like your favorite playlist"},
+  {a: "Discover a new species", b: "Discover a hidden room in your house"},
+  {a: "Read a book that changes your entire worldview", b: "Hear a song that perfectly captures how you feel"},
+  {a: "Have your sketchbook published as a book", b: "Have your photos displayed in a gallery show"},
+  {a: "Be stuck in a time loop of your best day ever", b: "Always move forward but never relive good memories"},
+  {a: "Have a secret treehouse studio", b: "Have a secret underground library"},
+  {a: "Fluently speak 5 languages", b: "Master 5 art mediums"},
+  {a: "Go on a road trip with the Hawthorne brothers", b: "Go on a road trip with the Stranger Things cast"},
+  {a: "Always smell like fresh books", b: "Always smell like oil paint and turpentine"},
+  {a: "Have your own podcast about art and music", b: "Have your own indie zine/magazine"},
+  {a: "Live in a cabin in the mountains with fast wifi", b: "Live in a beach house with no internet"},
+  {a: "Watch every movie ever made", b: "Read every book ever written"},
+  {a: "Be an amazing cook", b: "Be an amazing gardener"},
+  {a: "Control what you dream about every night", b: "Never need to sleep"},
+  {a: "Teleport anywhere but only once per week", b: "Fly but only at walking speed"},
+  {a: "Everything you draw comes to life", b: "You can step inside any painting"},
+  {a: "Know the ending of every book before you read it", b: "Forget every book so you can reread it fresh"},
+];
+
+let wyrState = { current: 0, order: [] };
+
+function shuffleWYR() {
+  wyrState.order = [...Array(wyrQuestions.length).keys()];
+  for (let i = wyrState.order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [wyrState.order[i], wyrState.order[j]] = [wyrState.order[j], wyrState.order[i]];
+  }
+  wyrState.current = 0;
+}
+
+function renderWYR() {
+  if (wyrState.order.length === 0) shuffleWYR();
+  const idx = wyrState.order[wyrState.current];
+  const q = wyrQuestions[idx];
+  const panel = document.getElementById('wyr-panel');
+  panel.innerHTML = `
+    <div class="wyr-card">
+      <h3>Would You Rather</h3>
+      <div class="wyr-options">
+        <button class="wyr-option" onclick="selectWYR(this)">${q.a}</button>
+        <p class="wyr-divider">or</p>
+        <button class="wyr-option" onclick="selectWYR(this)">${q.b}</button>
+      </div>
+    </div>
+    <p style="font-size: 0.8rem; color: var(--warm-gray); margin-bottom: 12px;">${wyrState.current + 1} of ${wyrState.order.length}</p>
+    <button class="wyr-next-btn" onclick="nextWYR()">Next Question</button>
+  `;
+}
+
+function selectWYR(el) {
+  document.querySelectorAll('.wyr-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function nextWYR() {
+  wyrState.current++;
+  if (wyrState.current >= wyrState.order.length) shuffleWYR();
+  renderWYR();
+}
+
+function switchGameTab(tab) {
+  document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('trivia-panel').style.display = tab === 'trivia' ? 'block' : 'none';
+  document.getElementById('wyr-panel').style.display = tab === 'wyr' ? 'block' : 'none';
+  if (tab === 'wyr' && wyrState.order.length === 0) renderWYR();
+}
+
+renderWYR();
+</script>
+</body>
+</html>
